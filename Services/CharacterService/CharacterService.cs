@@ -28,6 +28,12 @@ namespace rpg_combat.Services.CharacterService
             return characters.Select(character => mapper.Map<GetCharacterDto>(character)).ToList();
         }
 
+        public async Task Delete(int id)
+        {
+            var character = characters.FirstOrDefault(c => c.Id == id);
+            characters.Remove(character);
+        }
+
         public async Task<IEnumerable<GetCharacterDto>> GetAll()
         {
             return characters.Select(character => mapper.Map<GetCharacterDto>(character)).ToList();
@@ -36,6 +42,19 @@ namespace rpg_combat.Services.CharacterService
         public async Task<GetCharacterDto> GetById(int id)
         {
             return mapper.Map<GetCharacterDto>(characters.FirstOrDefault(c => c.Id == id));
+        }
+
+        public async Task<GetCharacterDto> Update(UpdateCharacterDto updatedCharacterDto)
+        {
+            var character = characters.FirstOrDefault(c => c.Id == updatedCharacterDto.Id);
+            character.Name = updatedCharacterDto.Name;
+            character.Class = updatedCharacterDto.Class;
+            character.Defense = updatedCharacterDto.Defense;
+            character.HitPoints = updatedCharacterDto.HitPoints;
+            character.Intelligence = updatedCharacterDto.Intelligence;
+            character.Strength = updatedCharacterDto.Strength;
+
+            return mapper.Map<GetCharacterDto>(character);
         }
     }
 }

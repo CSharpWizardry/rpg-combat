@@ -42,5 +42,30 @@ namespace rpg_combat.Controllers
             return CreatedAtAction(nameof(Create), new { }, character);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, UpdateCharacterDto character)
+        {
+            if (id != character.Id)
+                return BadRequest();
+
+            var existingCharacter = await characterService.GetById(id);
+            if (existingCharacter is null)
+                return NotFound();
+            
+            await characterService.Update(character);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var existingCharacter = await characterService.GetById(id);
+            if (existingCharacter is null)
+                return NotFound();
+
+            await characterService.Delete(id);
+            return NoContent();
+        }
+
     }
 }
