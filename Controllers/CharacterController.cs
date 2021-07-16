@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using rpg_combat.Dtos.Character;
 using rpg_combat.Models;
+using rpg_combat.Services.CharacterService;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace rpg_combat.Controllers
 {    
@@ -9,26 +12,34 @@ namespace rpg_combat.Controllers
     [ApiController]
     public class CharacterController : ControllerBase
     {
-        private static List<Character> characters = new List<Character>{
-            new Character(),
-            new Character {Id = 1, Name = "character 2", Class = CharacterClass.Wizard},
-            new Character {Id = 2, Name = "character 3", Class = CharacterClass.Cleric},
-        };
+        private readonly ICharacterService characterService;
+
+        public CharacterController(ICharacterService characterService)
+        {
+            this.characterService = characterService;
+        }
 
         [HttpGet("GetAll")]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            return Ok(characters);
+            return Ok(await characterService.GetAll());
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetSingle(int id)
+        public async Task<IActionResult> GetSingle(int id)
         {
-            var character = characters.FirstOrDefault(c => c.Id == id);
+            var character = await characterService.GetById(id);
             if (character is null)
                 return NotFound();
             
             return Ok(character);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(AddCharacterDto character)
+        {
+            await characterService.Add(character);
+            return CreatedAtAction(nameof(Create), new { }, character);
         }
 
     }

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using rpg_combat.Services.CharacterService;
 
 namespace rpg_combat
 {
@@ -26,6 +27,8 @@ namespace rpg_combat
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddScoped<ICharacterService, CharacterService>();
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
         }
 
