@@ -20,12 +20,12 @@ namespace rpg_combat.Services.CharacterService
         {
             this.mapper = mapper;
         }
-        public async Task<IEnumerable<GetCharacterDto>> Add(AddCharacterDto newCharacter)
+        public async Task<GetCharacterDto> Add(AddCharacterDto newCharacter)
         {
             var character = mapper.Map<Character>(newCharacter);
             character.Id = characters.Max(c => c.Id) + 1;
             characters.Add(character);
-            return characters.Select(character => mapper.Map<GetCharacterDto>(character)).ToList();
+            return mapper.Map<GetCharacterDto>(character);
         }
 
         public async Task Delete(int id)

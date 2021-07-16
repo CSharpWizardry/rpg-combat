@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using rpg_combat.Services.CharacterService;
 
 namespace rpg_combat
@@ -29,6 +32,24 @@ namespace rpg_combat
 
             services.AddScoped<ICharacterService, CharacterService>();
             services.AddAutoMapper(typeof(Startup));
+            services.AddSwaggerGen(c => 
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo{
+                    Version = "v1",
+                    Title = "RPG Combat",
+                    Description = "A Combat game for RPG characters",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Guilherme Soster",
+                        Email = "guilhermesosters@gmail.com",
+                        Url = new Uri("https://github.com/gsoster")
+                    }
+                });
+                
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
             services.AddControllers();
         }
 
@@ -38,6 +59,11 @@ namespace rpg_combat
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => 
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "RPG Combat V1");
+                });
             }
 
             // app.UseHttpsRedirection();

@@ -9,7 +9,7 @@ namespace rpg_combat.Services.CharacterService
     {
         Task<IEnumerable<GetCharacterDto>> GetAll();
         Task<GetCharacterDto> GetById(int id);
-        Task<IEnumerable<GetCharacterDto>> Add(AddCharacterDto newCharacter);
+        Task<GetCharacterDto> Add(AddCharacterDto newCharacter);
         Task<GetCharacterDto> Update(UpdateCharacterDto updatedCharacter);
         Task Delete(int id);
     }
