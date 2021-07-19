@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using rpg_combat.Dtos.Character;
 using rpg_combat.Services.CharacterService;
+using System.Collections.Generic;
 using System.Net.Mime;
 using System.Threading.Tasks;
 
@@ -26,7 +27,7 @@ namespace rpg_combat.Controllers
         /// <response code="200">Returns list with all characters</response>
         [HttpGet("GetAll")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<GetCharacterDto>>> Get()
         {
             return Ok(await characterService.GetAll());
         }
@@ -41,7 +42,7 @@ namespace rpg_combat.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetSingle(int id)
+        public async Task<ActionResult<GetCharacterDto>> GetSingle(int id)
         {
             var character = await characterService.GetById(id);
             if (character is null)
