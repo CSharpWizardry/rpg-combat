@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using rpg_combat.Dtos.Character;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace rpg_combat.Controllers
 {    
+    [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
     [Consumes(MediaTypeNames.Application.Json)]
     [Route("api/[controller]")]
