@@ -62,7 +62,7 @@ namespace rpg_combat.test
         }
 
         [TestMethod]
-        public async Task GetSpecificCharacterShouldReturnBadRequestWhenItDoesntExist()
+        public async Task GetSpecificCharacterShouldReturnNotFoundWhenItDoesntExist()
         {
             //Arrange
             int testId = 5;
