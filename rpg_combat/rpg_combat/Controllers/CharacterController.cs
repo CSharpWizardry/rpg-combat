@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using rpg_combat.Dtos.Character;
 using rpg_combat.Services.CharacterService;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace rpg_combat.Controllers
@@ -31,6 +33,9 @@ namespace rpg_combat.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<GetCharacterDto>>> Get()
         {
+            //TODO: line below was replaced by IHttpContextAccessor inside service and should be removed later
+            //int userId = int.Parse(User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier).Value));                
+
             return Ok(await characterService.GetAll());
         }
 
