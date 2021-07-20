@@ -33,6 +33,7 @@ namespace rpg_combat
         {
             services.AddDbContext<DataContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqliteConnectionString")));
             services.AddScoped<ICharacterService, CharacterService>();
+            services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddAutoMapper(typeof(Startup));
             services.AddSwaggerGen(c => 
             {
