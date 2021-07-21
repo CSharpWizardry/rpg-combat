@@ -1,3 +1,4 @@
+using rpg_combat.Dtos.Weapon;
 using rpg_combat.Models;
 
 namespace rpg_combat.Dtos.Character
@@ -11,5 +12,6 @@ namespace rpg_combat.Dtos.Character
         public int Defense { get; set; } = 10;
         public int Intelligence { get; set; } = 10;
         public CharacterClass Class { get; set; } = CharacterClass.Fighter;
+        public GetWeaponDto Weapon { get; set; }
     }
 }

@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using rpg_combat.Data;
 
 namespace rpg_combat.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210721140333_Weapon")]
+    partial class Weapon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,38 +50,6 @@ namespace rpg_combat.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Characters");
-                });
-
-            modelBuilder.Entity("rpg_combat.Models.CharacterSkill", b =>
-                {
-                    b.Property<int>("CharacterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SkillId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("CharacterId", "SkillId");
-
-                    b.HasIndex("SkillId");
-
-                    b.ToTable("CharacterSkills");
-                });
-
-            modelBuilder.Entity("rpg_combat.Models.Skill", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Damage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Skills");
                 });
 
             modelBuilder.Entity("rpg_combat.Models.User", b =>
@@ -134,25 +104,6 @@ namespace rpg_combat.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("rpg_combat.Models.CharacterSkill", b =>
-                {
-                    b.HasOne("rpg_combat.Models.Character", "Character")
-                        .WithMany("CharacterSkills")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("rpg_combat.Models.Skill", "Skill")
-                        .WithMany("CharacterSkills")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
-
-                    b.Navigation("Skill");
-                });
-
             modelBuilder.Entity("rpg_combat.Models.Weapon", b =>
                 {
                     b.HasOne("rpg_combat.Models.Character", "Character")
@@ -166,14 +117,7 @@ namespace rpg_combat.Migrations
 
             modelBuilder.Entity("rpg_combat.Models.Character", b =>
                 {
-                    b.Navigation("CharacterSkills");
-
                     b.Navigation("Weapon");
-                });
-
-            modelBuilder.Entity("rpg_combat.Models.Skill", b =>
-                {
-                    b.Navigation("CharacterSkills");
                 });
 #pragma warning restore 612, 618
         }

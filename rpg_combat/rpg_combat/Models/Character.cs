@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace rpg_combat.Models
 {
     public class Character
@@ -9,7 +11,8 @@ namespace rpg_combat.Models
         public int Defense { get; set; } = 10;
         public int Intelligence { get; set; } = 10;
         public CharacterClass Class { get; set; } = CharacterClass.Fighter;
-
         public User User { get; set; }
+        public Weapon Weapon { get; set; }
+        public List<CharacterSkill> CharacterSkills { get; set; }
     }
 }
