@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using rpg_combat.Data;
 using rpg_combat.Services.CharacterService;
+using rpg_combat.Services.CharacterSkillService;
 using rpg_combat.Services.WeaponService;
 
 namespace rpg_combat
@@ -40,6 +41,7 @@ namespace rpg_combat
             services.AddScoped<ICharacterService, CharacterService>();
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IWeaponService, WeaponService>();
+            services.AddScoped<ICharacterSkillService, CharacterSkillService>();
             services.AddAutoMapper(typeof(Startup));
             services.AddSwaggerGen(c => 
             {

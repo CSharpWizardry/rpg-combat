@@ -50,7 +50,10 @@ namespace rpg_combat.Services.CharacterService
 
         public async Task<GetCharacterDto> GetById(int id)
         {
-            Character character = await context.Characters.Where(c => c.User.Id == GetUserId()).FirstOrDefaultAsync(c => c.Id == id);
+            Character character = await context.Characters
+                                                        .Include(c => c.Weapon)
+                                                        .Include(c => c.CharacterSkills).ThenInclude(cs => cs.Skill)
+                                                        .Where(c => c.User.Id == GetUserId()).FirstOrDefaultAsync(c => c.Id == id);
             return mapper.Map<GetCharacterDto>(character);
         }
 
