@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using rpg_combat.Data;
@@ -17,6 +18,33 @@ namespace rpg_combat.Services.FightService
 
         }
 
+        public async Task<ServiceResponse<AttackResultDto>> SkillAttack(SkillAttackDto request)
+        {
+            var attacker = await context.Characters
+                                                    .Include(c => c.CharacterSkills)
+                                                    .ThenInclude(cs => cs.Skill)
+                                                    .FirstOrDefaultAsync(c => c.Id == request.AttackerId);
+            var opponent = await context.Characters.FirstOrDefaultAsync(c => c.Id == request.OpponentId);
+            if (attacker is null || opponent is null)
+                return ServiceResponse<AttackResultDto>.FailedFrom("Attacker or Opponent not found");
+
+             var skill = attacker.CharacterSkills.FirstOrDefault(s => s.SkillId == request.SkillId)?.Skill;
+             if (skill is null)
+                return ServiceResponse<AttackResultDto>.FailedFrom($"{attacker.Name} doesn't know that skill");
+            
+            int damage = skill.Damage + (new Random().Next(attacker.Intelligence));
+             damage -= new Random().Next(opponent.Defense);
+
+             if (damage > 0)
+            {
+                opponent.HitPoints -= damage;
+                context.Characters.Update(opponent);
+                await context.SaveChangesAsync();
+            }
+            
+            return FromAttack(damage, attacker, opponent);
+        }
+
         public async Task<ServiceResponse<AttackResultDto>> WeaponAttack(WeaponAttackDto request)
         {
             var attacker = await context.Characters.Include(c => c.Weapon).FirstOrDefaultAsync(c => c.Id == request.AttackerId);
@@ -26,7 +54,7 @@ namespace rpg_combat.Services.FightService
                 return ServiceResponse<AttackResultDto>.FailedFrom("Attacker or Opponent not found");
             
             
-            //any valye between zero and the strenght (plus weapon damage) - any value between zero and defense
+            //any value between zero and the strenght (plus weapon damage) - any value between zero and defense
             int damage = attacker.Weapon.Damage + (new Random().Next(attacker.Strength));
             damage -= new Random().Next(opponent.Defense);
 
@@ -37,6 +65,11 @@ namespace rpg_combat.Services.FightService
                 await context.SaveChangesAsync();
             }
             
+            return FromAttack(damage, attacker, opponent);
+        }
+
+        private static ServiceResponse<AttackResultDto> FromAttack(int damage, Character attacker, Character opponent)
+        {
             return ServiceResponse<AttackResultDto>.From(new AttackResultDto {
                 Attacker = attacker.Name,
                 AttackerHp = attacker.HitPoints,
@@ -44,7 +77,6 @@ namespace rpg_combat.Services.FightService
                 Opponent = opponent.Name,
                 OpponentHp = opponent.HitPoints
             });
-        
         }
     }
 }

@@ -23,5 +23,11 @@ namespace rpg_combat.Controllers
         {
             return Ok(await fightService.WeaponAttack(attackRequest));
         }
+
+        [HttpPost("skill")]
+        public async Task<IActionResult> SkillAttack(SkillAttackDto attackRequest)
+        {
+            return Ok(await fightService.SkillAttack(attackRequest));
+        }
     }
 }
