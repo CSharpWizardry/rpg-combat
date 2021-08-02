@@ -15,7 +15,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"gsoster\",\n    \"password\": \"123\"\n}",
+							"raw": "{\n    \"username\": \"gsoster1\",\n    \"password\": \"123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -76,6 +76,16 @@
 				{
 					"name": "GET characters",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNjgyMzA5NywiZXhwIjoxNjI2OTA5NDk3LCJpYXQiOjE2MjY4MjMwOTd9.18H5HK1-0Vxa-PlzBkJC_nts7Ar4hS0_q_eQxrCOuIULP3E7a9PimsOPdb56Hv_zQBAvSrAD0SLsC4_dEB-37A",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -97,38 +107,18 @@
 				{
 					"name": "Get a specific character by id",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNzkyNDM5OCwiZXhwIjoxNjI4MDEwNzk4LCJpYXQiOjE2Mjc5MjQzOTh9.fdQwSAHJ-v77mTy0TK9SPBHplJWdFJ9VDb_UmLGJIXpF4QZ08BJK8_Av73DdabVrhZKz6gVn3gxgm-A_KIobUA",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "http://localhost:5000/api/character/1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"api",
-								"character",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Character",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": 2,\n    \"name\": \"My character\",\n    \"HitPoints\": 350,\n    \"class\": 1\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "http://localhost:5000/api/character/2",
 							"protocol": "http",
@@ -146,13 +136,63 @@
 					"response": []
 				},
 				{
+					"name": "Update Character",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNjgyMzA5NywiZXhwIjoxNjI2OTA5NDk3LCJpYXQiOjE2MjY4MjMwOTd9.18H5HK1-0Vxa-PlzBkJC_nts7Ar4hS0_q_eQxrCOuIULP3E7a9PimsOPdb56Hv_zQBAvSrAD0SLsC4_dEB-37A",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 3,\n    \"name\": \"My character222\",\n    \"HitPoints\": 350,\n    \"class\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/character/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"character",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Add Character",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNjgyMzA5NywiZXhwIjoxNjI2OTA5NDk3LCJpYXQiOjE2MjY4MjMwOTd9.18H5HK1-0Vxa-PlzBkJC_nts7Ar4hS0_q_eQxrCOuIULP3E7a9PimsOPdb56Hv_zQBAvSrAD0SLsC4_dEB-37A",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 56,\n    \"name\": \"new character\",\n    \"class\": 1\n}",
+							"raw": "{\n    \"name\": \"new Mage\",\n    \"class\": 2\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -178,10 +218,20 @@
 				{
 					"name": "Delete Character",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNjgyMzA5NywiZXhwIjoxNjI2OTA5NDk3LCJpYXQiOjE2MjY4MjMwOTd9.18H5HK1-0Vxa-PlzBkJC_nts7Ar4hS0_q_eQxrCOuIULP3E7a9PimsOPdb56Hv_zQBAvSrAD0SLsC4_dEB-37A",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:5000/api/character/1",
+							"raw": "http://localhost:5000/api/character/3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -190,7 +240,181 @@
 							"path": [
 								"api",
 								"character",
-								"1"
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Weapon",
+			"item": []
+		},
+		{
+			"name": "CharacterSkills",
+			"item": [
+				{
+					"name": "Add Character Skill",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNzMzNTEwMywiZXhwIjoxNjI3NDIxNTAzLCJpYXQiOjE2MjczMzUxMDN9.M5RSSRCOIdhK8VAaPuJ94J401NXPU7Ar8W2Xd-rc_eGp9o73uOMuZcLZIOWH9ssrEuRhuuGCMDmj4ggNAi4KlA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"characterId\": 2,\n    \"skillId\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/characterskill/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"characterskill",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Fight",
+			"item": [
+				{
+					"name": "Weapon Attack",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNzMzNzgxMywiZXhwIjoxNjI3NDI0MjEzLCJpYXQiOjE2MjczMzc4MTN9.33fTqglxNRWFd7-McV8HbO7xeeTxkmW1__Svv6Nlj3C2wfGbixnuQjUEwIqyCjfHc6zTgMeaDER4AK5pxa3lVQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"attackerId\": 2,\n    \"opponentId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/fight/weapon",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"fight",
+								"weapon"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Skill Attack",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNzkyNDM5OCwiZXhwIjoxNjI4MDEwNzk4LCJpYXQiOjE2Mjc5MjQzOTh9.fdQwSAHJ-v77mTy0TK9SPBHplJWdFJ9VDb_UmLGJIXpF4QZ08BJK8_Av73DdabVrhZKz6gVn3gxgm-A_KIobUA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"attackerId\": 2,\n    \"opponentId\": 1,\n    \"skillId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/fight/skill",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"fight",
+								"skill"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fight - deathmatch simulation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNzkyNDM5OCwiZXhwIjoxNjI4MDEwNzk4LCJpYXQiOjE2Mjc5MjQzOTh9.fdQwSAHJ-v77mTy0TK9SPBHplJWdFJ9VDb_UmLGJIXpF4QZ08BJK8_Av73DdabVrhZKz6gVn3gxgm-A_KIobUA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"CharacterIds\": [1, 2]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/fight/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"fight",
+								""
 							]
 						}
 					},

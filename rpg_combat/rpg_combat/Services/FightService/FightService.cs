@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -28,20 +29,14 @@ namespace rpg_combat.Services.FightService
             if (attacker is null || opponent is null)
                 return ServiceResponse<AttackResultDto>.FailedFrom("Attacker or Opponent not found");
 
-             var skill = attacker.CharacterSkills.FirstOrDefault(s => s.SkillId == request.SkillId)?.Skill;
-             if (skill is null)
+            var skill = attacker.CharacterSkills.FirstOrDefault(s => s.SkillId == request.SkillId)?.Skill;
+            if (skill is null)
                 return ServiceResponse<AttackResultDto>.FailedFrom($"{attacker.Name} doesn't know that skill");
-            
-            int damage = skill.Damage + (new Random().Next(attacker.Intelligence));
-             damage -= new Random().Next(opponent.Defense);
 
-             if (damage > 0)
-            {
-                opponent.HitPoints -= damage;
-                context.Characters.Update(opponent);
-                await context.SaveChangesAsync();
-            }
+            int damage = DoSkillDamage(attacker, opponent, skill);
             
+            context.Characters.Update(opponent);
+            await context.SaveChangesAsync();
             return FromAttack(damage, attacker, opponent);
         }
 
@@ -52,22 +47,91 @@ namespace rpg_combat.Services.FightService
             var opponent = await context.Characters.FirstOrDefaultAsync(c => c.Id == request.OpponentId);
             if (attacker is null || opponent is null)
                 return ServiceResponse<AttackResultDto>.FailedFrom("Attacker or Opponent not found");
-            
-            
-            //any value between zero and the strenght (plus weapon damage) - any value between zero and defense
-            int damage = attacker.Weapon.Damage + (new Random().Next(attacker.Strength));
-            damage -= new Random().Next(opponent.Defense);
 
-            if (damage > 0)
-            {
-                opponent.HitPoints -= damage;
-                context.Characters.Update(opponent);
-                await context.SaveChangesAsync();
-            }
+
+            //any value between zero and the strenght (plus weapon damage) - any value between zero and defense
+            int damage = DoWeaponDamage(attacker, opponent);
             
+            context.Characters.Update(opponent);
+            await context.SaveChangesAsync();
             return FromAttack(damage, attacker, opponent);
         }
+        public async Task<ServiceResponse<FightResultDto>> Fight(FightRequestDto request)
+        {
+            List<Character> characters = await context.Characters
+                                                                .Include(c => c.Weapon)
+                                                                .Include(c => c.CharacterSkills).ThenInclude(cs => cs.Skill)
+                                                                .Where(c => request.CharacterIds.Contains(c.Id)).ToListAsync();
+            
+            bool defeated = false;
+            List<string> battleLog = new List<string>();
+            int winnerId = request.CharacterIds.First();
+            while(!defeated)
+            {
+                foreach(Character attacker in characters)
+                {
+                    List<Character> opponents = characters.Where(c => c.Id != attacker.Id).ToList();
+                    var opponent = opponents[new Random().Next(opponents.Count)];
 
+                    int damage = 0;
+                    string attackUsed = String.Empty;
+
+                    bool useWeapon = new Random().Next(2) == 0;
+                    if (useWeapon)
+                    {
+                        attackUsed = attacker.Weapon.Name;
+                        damage = DoWeaponDamage(attacker, opponent);
+                    }
+                    else
+                    {
+                        var skill = attacker.CharacterSkills[new Random().Next(attacker.CharacterSkills.Count)].Skill;
+                        attackUsed = skill.Name;
+                        damage = DoSkillDamage(attacker, opponent, skill);
+                    }
+                    battleLog.Add($"{attacker.Name} attacks {opponent.Name} using {attackUsed} with {(damage >= 0 ? damage : 0)} damage.");
+                    if (opponent.HitPoints <= 0)
+                    {
+                        winnerId = attacker.Id;
+                        defeated = true;
+                        attacker.Victories++;
+                        opponent.Defeats++;
+                        battleLog.Add($"{attacker.Name} wins with {attacker.HitPoints} HP left!");
+                        battleLog.Add($"{opponent.Name} has been defeated"!);
+                        break;
+                    }                        
+                }
+            }
+
+            characters.ForEach(c => 
+            {
+                c.Fights++;
+                c.HitPoints = 100;
+            });
+
+            context.Characters.UpdateRange(characters);
+            await context.SaveChangesAsync();
+            return ServiceResponse<FightResultDto>.From(new FightResultDto{
+                BattleLog = battleLog
+            });
+        }
+
+        private static int DoWeaponDamage(Character attacker, Character opponent)
+        {
+            int damage = attacker.Weapon.Damage + (new Random().Next(attacker.Strength));
+            damage -= new Random().Next(opponent.Defense);
+            if (damage > 0)
+                opponent.HitPoints -= damage;
+            return damage;
+        }
+
+        private static int DoSkillDamage(Character attacker, Character opponent, Skill skill)
+        {
+            int damage = skill.Damage + (new Random().Next(attacker.Intelligence));
+            damage -= new Random().Next(opponent.Defense);
+            if (damage > 0)
+                opponent.HitPoints -= damage;
+            return damage;
+        }
         private static ServiceResponse<AttackResultDto> FromAttack(int damage, Character attacker, Character opponent)
         {
             return ServiceResponse<AttackResultDto>.From(new AttackResultDto {
@@ -78,5 +142,7 @@ namespace rpg_combat.Services.FightService
                 OpponentHp = opponent.HitPoints
             });
         }
+
+        
     }
 }

@@ -29,5 +29,12 @@ namespace rpg_combat.Controllers
         {
             return Ok(await fightService.SkillAttack(attackRequest));
         }
+
+        //Becomes the defaul route
+        [HttpPost]
+        public async Task<IActionResult> Fight(FightRequestDto fightRequest)
+        {
+            return Ok(await fightService.Fight(fightRequest));
+        }
     }
 }
