@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -41,20 +42,12 @@ namespace rpg_combat.test
            await characterService.Received().GetAll();
         }
 
-        private IEnumerable<GetCharacterDto> GetFakeCharacterDtoList(int count = 10)
-        {
-            var list = new List<GetCharacterDto>();
-            for (int i = 0; i < count; i++)
-                list.Add(Substitute.For<GetCharacterDto>());
-            return list;
-        }
-
         [TestMethod]
         public async Task GetSpecificCharacterShouldReturnItWhenItExists()
         {
             //Arrange
             int testId = 3;
-            var character = new GetCharacterDto {Id = testId, Name = "character 3"};
+            var character = CreateGetCharacterDto(testId);
             characterService.GetById(Arg.Any<int>()).Returns(Task.FromResult<GetCharacterDto>(null));
             characterService.GetById(testId).Returns(Task.FromResult(character));
 
@@ -84,5 +77,140 @@ namespace rpg_combat.test
             Assert.IsNull(result);
             await characterService.Received().GetById(testId);
         }
+
+        [TestMethod]
+        public async Task DeleteCharacterShouldReturnNoContentWhenSuccessfulExecuted()
+        {
+            //Arrange
+            int id = 1;
+            characterService.GetById(id).Returns(Task.FromResult(CreateGetCharacterDto(id)));
+
+            //Act
+            var actionResult = await controller.Delete(id);
+
+            //Assert
+            var result = actionResult as NoContentResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(StatusCodes.Status204NoContent, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task DeleteCharacterShouldReturnNotFoundWhenCharacterDoesntExist()
+        {
+            //Arrange
+            int id = 10;
+            characterService.GetById(Arg.Any<int>()).Returns(Task.FromResult<GetCharacterDto>(null));
+
+            //Act
+            var actionResult = await controller.Delete(id);
+
+            //Assert
+            var result = actionResult as NotFoundResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(StatusCodes.Status404NotFound, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task CreateCharacterShouldReturnNoContentWhenCharacterCreated()
+        {
+            //Arrange            
+            var characterRequest = new AddCharacterDto
+            {
+                Defense = 10,
+                HitPoints = 100,
+                Intelligence = 10,
+                Strength = 10
+            };
+            characterService.Add(characterRequest).Returns(Task.FromResult(CreateGetCharacterDto(1)));
+
+            //Act
+            var actionResult = await controller.Create(characterRequest);
+
+            //Assert
+            var result = actionResult as CreatedAtActionResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(StatusCodes.Status201Created, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task UpdateCharacterShouldReturnBadRequestWhenCharacterAndCharacterIdDoesntMatch()
+        {
+            //Arrange
+            const int testId = 1;
+            var characterRequest = new UpdateCharacterDto
+            {
+                Id = testId + 1,
+                Defense = 10,
+                HitPoints = 100
+            };
+
+            //Act
+            var actionResult = await controller.Update(testId, characterRequest);
+
+            //Assert
+            Assert.IsNotNull(actionResult);
+            var result = actionResult as BadRequestResult;
+            Assert.AreEqual(StatusCodes.Status400BadRequest, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task UpdateCharacterShouldReturnNotFoundWhenCharacterDoesntExist()
+        {
+            //Arrange
+            const int testId = 1;
+            var characterRequest = new UpdateCharacterDto
+            {
+                Id = testId ,
+                Defense = 10,
+                HitPoints = 100
+            };
+
+            characterService.GetById(testId).Returns(Task.FromResult<GetCharacterDto>(null));
+
+            //Act
+            var actionResult = await controller.Update(testId, characterRequest);
+
+            //Assert
+            Assert.IsNotNull(actionResult);
+            var result = actionResult as NotFoundResult;
+            Assert.AreEqual(StatusCodes.Status404NotFound, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task UpdateCharacterShouldReturnNoContentWhenCharacterIsSuccessfulyUpdated()
+        {
+            //Arrange
+            const int testId = 1;
+            var characterRequest = new UpdateCharacterDto
+            {
+                Id = testId,
+                Defense = 10,
+                HitPoints = 100
+            };
+
+            characterService.GetById(testId).Returns(Task.FromResult<GetCharacterDto>(CreateGetCharacterDto(testId)));
+            characterService.Update(characterRequest).Returns(Task.FromResult(CreateGetCharacterDto(testId)));
+
+            //Act
+            var actionResult = await controller.Update(testId, characterRequest);
+
+            //Assert
+            Assert.IsNotNull(actionResult);
+            var result = actionResult as NoContentResult;
+            Assert.AreEqual(StatusCodes.Status204NoContent, result.StatusCode);
+
+        }
+
+        #region utility methods
+        private static GetCharacterDto CreateGetCharacterDto(int id) => new GetCharacterDto { Id = id, Name = $"character {id}" };
+
+        private IEnumerable<GetCharacterDto> GetFakeCharacterDtoList(int count = 10)
+        {
+            var list = new List<GetCharacterDto>();
+            for (int i = 0; i < count; i++)
+                list.Add(CreateGetCharacterDto(i));
+            return list;
+        }
+        #endregion
     }
 }
