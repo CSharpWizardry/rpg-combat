@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
-using FakeItEasy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using rpg_combat.Data;
 using rpg_combat.Models;
 using rpg_combat.Services.CharacterService;
@@ -18,9 +19,10 @@ namespace rpg_combat.test.Services
         [TestInitialize()]
         public void Initialize() 
         {
-            var mapper = A.Fake<IMapper>();
-            context = A.Fake<DataContext>();
-            characterService = new CharacterService(mapper, context);
+            var mapper = Substitute.For<IMapper>();
+            var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+            context = Substitute.For<DataContext>();
+            characterService = new CharacterService(mapper, context, httpContextAccessor);
         }
 
         [TestMethod]
