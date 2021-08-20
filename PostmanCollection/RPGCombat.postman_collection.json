@@ -419,6 +419,36 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Highscore",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIyIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMSIsIm5iZiI6MTYyNzkzNjA4OCwiZXhwIjoxNjI4MDIyNDg4LCJpYXQiOjE2Mjc5MzYwODh9.1ZkAvxv5yFDakYA-4_xY0rOX6AqtejdME9AbV7xgvASyZovuqXKBlXI8fFAP_zIAHo-m3vzuoAgBhjhEKW5YFA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/fight",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"fight"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
