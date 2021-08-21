@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using rpg_combat.Dtos.Character;
 using rpg_combat.Services.CharacterService;
 using System.Collections.Generic;
@@ -19,10 +20,12 @@ namespace rpg_combat.Controllers
     public class CharacterController : ControllerBase
     {
         private readonly ICharacterService characterService;
+        private readonly ILogger<CharacterController> logger;
 
-        public CharacterController(ICharacterService characterService)
+        public CharacterController(ICharacterService characterService, ILogger<CharacterController> logger)
         {
             this.characterService = characterService;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -51,10 +54,11 @@ namespace rpg_combat.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GetCharacterDto>> GetSingle(int id)
         {
-            var character = await characterService.GetById(id);
+            var character = await characterService.GetById(id);            
             if (character is null)
                 return NotFound();
-            
+
+            logger.LogInformation($"Controller character received: {character.Name}, log count: {character.LifeLogs.Count}");
             return Ok(character);
         }
 
@@ -126,6 +130,23 @@ namespace rpg_combat.Controllers
 
             await characterService.Delete(id);
             return NoContent();
+        }
+
+        /// <summary>
+        /// Provides the entire life-log of relevant events for a given character
+        /// </summary>
+        /// <param name="id">character's id</param>
+        /// <returns></returns>
+        [HttpGet("{id}/lifelog")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetLifeLog(int id)
+        {
+            var serviceResponse = await characterService.GetLifeLogs(id);
+            if (serviceResponse.Success)
+                return Ok(serviceResponse.Data);
+
+            return NotFound(serviceResponse.Message);
         }
 
     }

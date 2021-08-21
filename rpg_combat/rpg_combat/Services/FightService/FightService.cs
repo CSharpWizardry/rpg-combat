@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using rpg_combat.Data;
 using rpg_combat.Dtos.Fight;
 using rpg_combat.Models;
@@ -14,11 +15,14 @@ namespace rpg_combat.Services.FightService
     {
         private readonly DataContext context;
         private readonly IMapper mapper;
+        private readonly ILogger<FightService> logger;
+
         //TODO: this service should receive the CharacterService and search characters by id! then use the authenticated user..
-        public FightService(DataContext context, IMapper mapper)
+        public FightService(DataContext context, IMapper mapper, ILogger<FightService> logger)
         {
             this.mapper = mapper;
             this.context = context;
+            this.logger = logger;
         }
 
         public async Task<ServiceResponse<AttackResultDto>> SkillAttack(SkillAttackDto request)
@@ -78,6 +82,7 @@ namespace rpg_combat.Services.FightService
             bool defeated = false;
             List<string> battleLog = new List<string>();
             int winnerId = request.CharacterIds.First();
+            List<LifeLog> lifeLogs = new List<LifeLog>();
             while (!defeated)
             {
                 foreach (Character attacker in characters)
@@ -109,6 +114,8 @@ namespace rpg_combat.Services.FightService
                         opponent.Defeats++;
                         battleLog.Add($"{attacker.Name} wins with {attacker.HitPoints} HP left!");
                         battleLog.Add($"{opponent.Name} has been defeated"!);
+                        lifeLogs.Add(LifeLog.CreateVictoryLog(attacker, attackUsed, opponent.Name));
+                        lifeLogs.Add(LifeLog.CreateDefeatLog(opponent, attackUsed, attacker));
                         break;
                     }
                 }
@@ -121,9 +128,11 @@ namespace rpg_combat.Services.FightService
             });
 
             context.Characters.UpdateRange(characters);
+            await context.LifeLogs.AddRangeAsync(lifeLogs);
             await context.SaveChangesAsync();
             return ServiceResponse<FightResultDto>.From(new FightResultDto
             {
+                WinnerId = winnerId,
                 BattleLog = battleLog
             });
         }

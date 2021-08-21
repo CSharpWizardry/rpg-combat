@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using rpg_combat.Data;
 using rpg_combat.Dtos.Character;
 using rpg_combat.Models;
@@ -16,18 +17,20 @@ namespace rpg_combat.Services.CharacterService
         private readonly IMapper mapper;
         private readonly DataContext context;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly ILogger<CharacterService> logger;
 
-        public CharacterService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor)
+        public CharacterService(IMapper mapper, DataContext context, IHttpContextAccessor httpContextAccessor, ILogger<CharacterService> logger)
         {
             this.httpContextAccessor = httpContextAccessor;
             this.mapper = mapper;
             this.context = context;
+            this.logger = logger;
         }
         public async Task<GetCharacterDto> Add(AddCharacterDto newCharacter)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == GetUserId());
             var character = mapper.Map<Character>(newCharacter);
-            character.User =user;
+            character.User = user;
             await context.Characters.AddAsync(character);
             await context.SaveChangesAsync();
             return mapper.Map<GetCharacterDto>(character);
@@ -51,10 +54,22 @@ namespace rpg_combat.Services.CharacterService
         public async Task<GetCharacterDto> GetById(int id)
         {
             Character character = await context.Characters
-                                                        .Include(c => c.Weapon)
+                                                        .Include(c => c.Weapon)                                                        
                                                         .Include(c => c.CharacterSkills).ThenInclude(cs => cs.Skill)
                                                         .Where(c => c.User.Id == GetUserId()).FirstOrDefaultAsync(c => c.Id == id);
+            //logger.LogInformation($"Character with id {id} Loaded!");
+            //logger.LogInformation($"Character {character.Name}, log count: {character.LifeLogs.Count}");
             return mapper.Map<GetCharacterDto>(character);
+        }
+
+        public async Task<ServiceResponse<List<GetLifeLogDto>>> GetLifeLogs(int id)
+        {
+            var lifeLogs = await context.LifeLogs.Where(l => l.Character.Id == id).ToListAsync();
+            logger.LogInformation($"{lifeLogs.Count} were loaded!!");
+            if (lifeLogs.Count > 0)
+                return ServiceResponse<List<GetLifeLogDto>>.From(lifeLogs.Select(l => mapper.Map<GetLifeLogDto>(l)).ToList());
+            
+            return ServiceResponse<List<GetLifeLogDto>>.FailedFrom($"No life logs found for character with id {id}");
         }
 
         public async Task<GetCharacterDto> Update(UpdateCharacterDto updatedCharacterDto)

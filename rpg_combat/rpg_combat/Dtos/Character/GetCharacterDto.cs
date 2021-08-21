@@ -19,5 +19,6 @@ namespace rpg_combat.Dtos.Character
         public int Fights { get; set; }
         public int Victories { get; set; }
         public int Defeats { get; set; }
+        public List<LifeLog> LifeLogs { get; set; }
     }
 }

@@ -12,5 +12,7 @@ namespace rpg_combat.Services.CharacterService
         Task<GetCharacterDto> Add(AddCharacterDto newCharacter);
         Task<GetCharacterDto> Update(UpdateCharacterDto updatedCharacter);
         Task Delete(int id);
+
+        Task<ServiceResponse<List<GetLifeLogDto>>> GetLifeLogs(int id);
     }
 }

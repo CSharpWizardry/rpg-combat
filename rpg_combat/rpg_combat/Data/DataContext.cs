@@ -15,6 +15,7 @@ namespace rpg_combat.Data
         public DbSet<Weapon> Weapons { get; set; }
         public DbSet<Skill> Skills { get; set; }
         public DbSet<CharacterSkill> CharacterSkills { get; set; }
+        public DbSet<LifeLog> LifeLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

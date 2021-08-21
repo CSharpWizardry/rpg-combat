@@ -18,6 +18,7 @@ namespace rpg_combat
             CreateMap<Weapon, GetWeaponDto>();
             CreateMap<Skill, GetSkillDto>();
             CreateMap<Character, HighscoreDto>();
+            CreateMap<LifeLog, GetLifeLogDto>();
         }
     }
 }
