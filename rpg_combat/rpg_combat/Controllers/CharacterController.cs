@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using rpg_combat.Dtos.Character;
 using rpg_combat.Services.CharacterService;
+using rpg_combat.Services.WeaponService;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
@@ -21,11 +22,13 @@ namespace rpg_combat.Controllers
     {
         private readonly ICharacterService characterService;
         private readonly ILogger<CharacterController> logger;
+        private readonly IWeaponService weaponService;
 
-        public CharacterController(ICharacterService characterService, ILogger<CharacterController> logger)
+        public CharacterController(ICharacterService characterService, IWeaponService weaponService, ILogger<CharacterController> logger)
         {
             this.characterService = characterService;
             this.logger = logger;
+            this.weaponService = weaponService;
         }
 
         /// <summary>
@@ -73,6 +76,8 @@ namespace rpg_combat.Controllers
         public async Task<IActionResult> Create(AddCharacterDto character)
         {
             var createdCharacter = await characterService.Add(character);
+            var characterWeapon = WeaponFactory.GetWeaponForClass(character.Class, createdCharacter.Id);
+            await weaponService.AddWeapon(characterWeapon);
             return CreatedAtAction(nameof(Create), new { id = createdCharacter.Id}, character);
         }
 

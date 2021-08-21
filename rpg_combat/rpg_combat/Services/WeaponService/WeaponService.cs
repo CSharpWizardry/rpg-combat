@@ -15,7 +15,7 @@ namespace rpg_combat.Services.WeaponService
     {
         private readonly IMapper mapper;
         private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly DataContext context;
+        private readonly DataContext context;        
         public WeaponService(DataContext context, IHttpContextAccessor httpContextAccessor, IMapper mapper)
         {
             this.context = context;
@@ -45,7 +45,6 @@ namespace rpg_combat.Services.WeaponService
             {
                 return ServiceResponse<GetCharacterDto>.FailedFrom(exception.Message);
             }
-
         }
         private int GetUserId() => int.Parse(httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
     }
