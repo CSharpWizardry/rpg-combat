@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9e5493b5-f636-476b-9377-109c5309a16c",
+		"_postman_id": "91c3144b-03ed-4400-b6e5-41695b6d5ae7",
 		"name": "RPGCombat",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -68,7 +68,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Character",
@@ -246,11 +247,54 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Weapon",
-			"item": []
+			"item": [
+				{
+					"name": "Add Weapon",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIzIiwidW5pcXVlX25hbWUiOiJnc29zdGVyMiIsIm5iZiI6MTYyODIwODY2NywiZXhwIjoxNjI4Mjk1MDY3LCJpYXQiOjE2MjgyMDg2Njd9.QuAqsUXJpNsQsrfYjUISP_xnVKarm-MPqsqI4cuM-LnYhXbs85W9SEuzk7lEIzg_O_eNKfUhpazqluO37Bj2CA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"My Super Weapon teste\",\r\n  \"damage\": 10,\r\n  \"characterId\": 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/weapon/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"weapon",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "CharacterSkills",
@@ -295,7 +339,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Fight",
@@ -420,7 +465,9 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }

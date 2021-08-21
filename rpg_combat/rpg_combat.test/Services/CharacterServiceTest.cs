@@ -1,29 +1,67 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using NSubstitute.Extensions;
 using rpg_combat.Data;
+using rpg_combat.Dtos.Character;
 using rpg_combat.Models;
 using rpg_combat.Services.CharacterService;
 
 namespace rpg_combat.test.Services
 {
+    [TestClass]
     public class CharacterServiceTest
     {
 
-        private ICharacterService characterService;
-        private DataContext context;
+        private static int userId = 1;
+        private static int characterId = 1;
+        private static IMapper mapper;
+        private static IHttpContextAccessor httpContextAccessor;
 
         [TestInitialize()]
         public void Initialize() 
         {
-            var mapper = Substitute.For<IMapper>();
-            var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
-            context = Substitute.For<DataContext>();
-            characterService = new CharacterService(mapper, context, httpContextAccessor);
+            mapper = Substitute.For<IMapper>();
+            httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+            var identifierClaims = new Claim(ClaimTypes.NameIdentifier, userId.ToString());
+            //var claims = new List<Claim>()
+            //{
+            //    new Claim(ClaimTypes.Name, "username"),
+            //    ,
+            //    new Claim("name", "John Doe"),
+            //};
+            //var identity = new ClaimsIdentity(claims, "TestAuthType");
+            //var claimsPrincipal = new ClaimsPrincipal(identity);
+            httpContextAccessor.HttpContext.User.FindFirst(Arg.Any<string>()).Returns(identifierClaims);
         }
+
+
+        [TestMethod]
+        public async Task GetAllCharactersShouldReturnEmptyListWhenThereAreNoCharacters()
+        {
+            //Arrange
+            var opt = new DbContextOptionsBuilder<DataContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+            using (var context = new DataContext(opt))
+            {
+                var service = new CharacterService(mapper, context, httpContextAccessor);
+
+                //Act
+                var result = await service.GetAll();
+
+                //Assert
+                Assert.IsNotNull(result);
+                //Assert.IsTrue(typeof(result) == IEnumerable<GetCharacterDto>));
+            }
+        }
+
 
         [TestMethod]
         public async Task RemoveCharacterShouldReturnFailWhenExceptionIsThrown()
@@ -44,5 +82,30 @@ namespace rpg_combat.test.Services
             //Assert
 
         }
+
+        #region utility methods
+        private static List<Character> GetListOfCharacters()
+            => new List<Character>
+            {
+                GetCharacter(userId),
+                GetCharacter(2),
+                GetCharacter(userId),
+                GetCharacter(3),
+                GetCharacter(userId),
+            };
+
+        private static Character GetCharacter(int userId)
+            => new Character
+            {
+                Id = characterId++,
+                Class = CharacterClass.Wizard,
+                HitPoints = 100,
+                User = new User
+                {
+                    Id = userId,
+                    Username = $"User {userId}"
+                }            
+            };
+        #endregion
     }
 }
