@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -7,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using rpg_combat.Data;
 using rpg_combat.Dtos;
 using rpg_combat.Dtos.Character;
+using rpg_combat.Dtos.Skill;
 using rpg_combat.Models;
 
 namespace rpg_combat.Services.CharacterSkillService
@@ -52,6 +55,20 @@ namespace rpg_combat.Services.CharacterSkillService
             catch(Exception ex)
             {
                 return ServiceResponse<GetCharacterDto>.FailedFrom(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResponse<List<GetSkillDto>>> GetSkills()
+        {
+            try
+            {
+                var skills = await context.Skills.ToListAsync();
+                var skillsDto = skills.Select(s => mapper.Map<GetSkillDto>(s)).ToList();
+                return ServiceResponse<List<GetSkillDto>>.From(skillsDto);
+            }
+            catch(Exception ex)
+            {
+                return ServiceResponse<List<GetSkillDto>>.FailedFrom(ex.Message);
             }
         }
 

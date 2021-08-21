@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using rpg_combat.Dtos;
+using rpg_combat.Dtos.Skill;
 using rpg_combat.Services.CharacterSkillService;
 
 namespace rpg_combat.Controllers
@@ -24,6 +26,17 @@ namespace rpg_combat.Controllers
             if (serviceResponse.Success)
                 return Ok(serviceResponse.Data);
             return BadRequest(serviceResponse);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<GetSkillDto>>> GetSkills()
+        {
+            var serviceResponse = await characterSkillService.GetSkills();
+            if (serviceResponse.Success)
+                return Ok(serviceResponse.Data);
+
+            return BadRequest(serviceResponse.Message);
+
         }
     }
 }
