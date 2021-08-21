@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using NSubstitute.Extensions;
@@ -51,7 +52,7 @@ namespace rpg_combat.test.Services
             var opt = new DbContextOptionsBuilder<DataContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             using (var context = new DataContext(opt))
             {
-                var service = new CharacterService(mapper, context, httpContextAccessor);
+                var service = new CharacterService(mapper, context, httpContextAccessor, NullLogger<CharacterService>.Instance);
 
                 //Act
                 var result = await service.GetAll();

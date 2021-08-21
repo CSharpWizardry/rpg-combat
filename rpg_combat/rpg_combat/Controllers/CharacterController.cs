@@ -58,7 +58,6 @@ namespace rpg_combat.Controllers
             if (character is null)
                 return NotFound();
 
-            logger.LogInformation($"Controller character received: {character.Name}, log count: {character.LifeLogs.Count}");
             return Ok(character);
         }
 
