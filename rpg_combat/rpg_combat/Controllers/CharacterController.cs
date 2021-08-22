@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using rpg_combat.Dtos.Character;
+using rpg_combat.Models;
 using rpg_combat.Services.CharacterService;
+using rpg_combat.Services.CharacterSkillService;
 using rpg_combat.Services.WeaponService;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,12 +25,14 @@ namespace rpg_combat.Controllers
         private readonly ICharacterService characterService;
         private readonly ILogger<CharacterController> logger;
         private readonly IWeaponService weaponService;
+        private readonly ICharacterSkillService characterSkillService;
 
-        public CharacterController(ICharacterService characterService, IWeaponService weaponService, ILogger<CharacterController> logger)
+        public CharacterController(ICharacterService characterService, IWeaponService weaponService, ICharacterSkillService characterSkillService, ILogger<CharacterController> logger)
         {
             this.characterService = characterService;
             this.logger = logger;
             this.weaponService = weaponService;
+            this.characterSkillService = characterSkillService;
         }
 
         /// <summary>
@@ -78,6 +82,19 @@ namespace rpg_combat.Controllers
             var createdCharacter = await characterService.Add(character);
             var characterWeapon = WeaponFactory.GetWeaponForClass(character.Class, createdCharacter.Id);
             await weaponService.AddWeapon(characterWeapon);
+            int skillId = 1; //fighter
+            if (createdCharacter.Class.Equals(CharacterClass.Wizard))
+            {
+                skillId = 2;
+            } else if (createdCharacter.Class.Equals(CharacterClass.Cleric))
+            {
+                skillId = 3;
+            }
+            await characterSkillService.AddCharacterSkill(new Dtos.AddCharacterSkillDto
+            {
+                CharacterId = createdCharacter.Id,
+                SkillId = skillId
+            });
             return CreatedAtAction(nameof(Create), new { id = createdCharacter.Id}, character);
         }
 

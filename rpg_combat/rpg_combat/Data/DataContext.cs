@@ -21,6 +21,16 @@ namespace rpg_combat.Data
         {
             //add composed key to the CharacterSkill table
             modelBuilder.Entity<CharacterSkill>().HasKey(cs => new { cs.CharacterId, cs.SkillId });
+            SeedSkills(modelBuilder);
+        }
+
+        private static void SeedSkills(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Skill>().HasData(
+                new Skill {Id = 1, Damage = 15, Name = "Frenzy" },
+                new Skill {Id = 2, Damage = 20, Name = "Blizzard" },
+                new Skill {Id = 3, Damage = 11, Name = "Radiant Spear" }
+            );
         }
     }
 }

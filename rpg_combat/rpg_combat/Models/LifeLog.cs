@@ -34,5 +34,17 @@ namespace rpg_combat.Models
                 IsVictory = false
             };
         }
+
+        public static LifeLog CreateBornLog(Character character)
+        {
+            return new LifeLog
+            {
+                Character = character,
+                HappenedOn = DateTime.UtcNow,
+                Log = $"On {DateTime.UtcNow} {character.Name} was born as a(n) {character.Class}. At the time he had {character.Intelligence} intelligence, {character.Strength} strength.",
+                IsBattleLog = false,
+                IsVictory = false
+            };
+        }
     }
 }
