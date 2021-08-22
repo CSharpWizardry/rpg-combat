@@ -17,6 +17,6 @@ namespace rpg_combat.Models
         public int Fights { get; set; }
         public int Victories { get; set; }
         public int Defeats { get; set; }
-        public List<LifeLog> LifeLogs { get; set; }
+        public List<LifeLog> LifeLogs { get; set; } = new List<LifeLog>();
     }
 }

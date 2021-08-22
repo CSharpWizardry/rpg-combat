@@ -31,6 +31,7 @@ namespace rpg_combat.Services.CharacterService
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == GetUserId());
             var character = mapper.Map<Character>(newCharacter);
             character.User = user;
+            character.LifeLogs.Add(LifeLog.CreateBornLog(character));
             await context.Characters.AddAsync(character);
             await context.SaveChangesAsync();
             return mapper.Map<GetCharacterDto>(character);
@@ -60,16 +61,6 @@ namespace rpg_combat.Services.CharacterService
             //logger.LogInformation($"Character with id {id} Loaded!");
             //logger.LogInformation($"Character {character.Name}, log count: {character.LifeLogs.Count}");
             return mapper.Map<GetCharacterDto>(character);
-        }
-
-        public async Task<ServiceResponse<List<GetLifeLogDto>>> GetLifeLogs(int id)
-        {
-            var lifeLogs = await context.LifeLogs.Where(l => l.Character.Id == id).ToListAsync();
-            logger.LogInformation($"{lifeLogs.Count} were loaded!!");
-            if (lifeLogs.Count > 0)
-                return ServiceResponse<List<GetLifeLogDto>>.From(lifeLogs.Select(l => mapper.Map<GetLifeLogDto>(l)).ToList());
-            
-            return ServiceResponse<List<GetLifeLogDto>>.FailedFrom($"No life logs found for character with id {id}");
         }
 
         public async Task<GetCharacterDto> Update(UpdateCharacterDto updatedCharacterDto)

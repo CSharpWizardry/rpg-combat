@@ -6,6 +6,7 @@ using rpg_combat.Dtos.Character;
 using rpg_combat.Models;
 using rpg_combat.Services.CharacterService;
 using rpg_combat.Services.CharacterSkillService;
+using rpg_combat.Services.LifeLogService;
 using rpg_combat.Services.WeaponService;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,13 +27,16 @@ namespace rpg_combat.Controllers
         private readonly ILogger<CharacterController> logger;
         private readonly IWeaponService weaponService;
         private readonly ICharacterSkillService characterSkillService;
+        private readonly ILifeLogService lifeLogService;
 
-        public CharacterController(ICharacterService characterService, IWeaponService weaponService, ICharacterSkillService characterSkillService, ILogger<CharacterController> logger)
+        public CharacterController(ICharacterService characterService, IWeaponService weaponService,
+            ICharacterSkillService characterSkillService, ILifeLogService lifeLogService, ILogger<CharacterController> logger)
         {
             this.characterService = characterService;
             this.logger = logger;
             this.weaponService = weaponService;
             this.characterSkillService = characterSkillService;
+            this.lifeLogService = lifeLogService;
         }
 
         /// <summary>
@@ -163,7 +167,7 @@ namespace rpg_combat.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetLifeLog(int id)
         {
-            var serviceResponse = await characterService.GetLifeLogs(id);
+            var serviceResponse = await lifeLogService.FromCharacter(id);
             if (serviceResponse.Success)
                 return Ok(serviceResponse.Data);
 

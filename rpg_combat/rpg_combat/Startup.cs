@@ -23,6 +23,7 @@ using rpg_combat.Data;
 using rpg_combat.Services.CharacterService;
 using rpg_combat.Services.CharacterSkillService;
 using rpg_combat.Services.FightService;
+using rpg_combat.Services.LifeLogService;
 using rpg_combat.Services.WeaponService;
 
 namespace rpg_combat
@@ -45,6 +46,7 @@ namespace rpg_combat
             services.AddScoped<IWeaponService, WeaponService>();
             services.AddScoped<ICharacterSkillService, CharacterSkillService>();
             services.AddScoped<IFightService, FightService>();
+            services.AddScoped<ILifeLogService, LifeLogService>();
             services.AddAutoMapper(typeof(Startup));
             services.AddSwaggerGen(c => 
             {
