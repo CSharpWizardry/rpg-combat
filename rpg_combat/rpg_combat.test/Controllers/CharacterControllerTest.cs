@@ -8,7 +8,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using rpg_combat.Controllers;
 using rpg_combat.Dtos.Character;
+using rpg_combat.Models;
 using rpg_combat.Services.CharacterService;
+using rpg_combat.Services.CharacterSkillService;
+using rpg_combat.Services.LifeLogService;
+using rpg_combat.Services.WeaponService;
 
 namespace rpg_combat.test
 {
@@ -17,12 +21,17 @@ namespace rpg_combat.test
     {
         private CharacterController controller;
         private ICharacterService characterService;
+        private ILifeLogService lifeLogService;
 
         [TestInitialize()]
         public void Initialize() 
         {
             this.characterService = Substitute.For<ICharacterService>();
-            controller = new CharacterController(characterService, NullLogger<CharacterController>.Instance);
+            IWeaponService weaponService = Substitute.For<IWeaponService>();
+            ICharacterSkillService characterSkillService = Substitute.For<ICharacterSkillService>();
+            lifeLogService = Substitute.For<ILifeLogService>();
+
+            controller = new CharacterController(characterService, weaponService, characterSkillService, lifeLogService, NullLogger<CharacterController>.Instance);
         }
 
         [TestMethod]
@@ -202,8 +211,50 @@ namespace rpg_combat.test
 
         }
 
+        [TestMethod]
+        public async Task GetLifeLogShouldReturnNotFoundWhenCharacterDoesntExistOrLifeLogForCharacterDoesntExist()
+        {
+            //Arrange
+            const int testId = 1;
+            var mockResponse = ServiceResponse<List<GetLifeLogDto>>.FailedFrom("Character not found");
+            lifeLogService.FromCharacter(testId).Returns(Task.FromResult<ServiceResponse<List<GetLifeLogDto>>>(mockResponse));
+
+            //Act
+            var actionResult = await controller.GetLifeLog(testId);
+
+            //Assert
+            Assert.IsNotNull(actionResult);
+            var result = actionResult as NotFoundObjectResult;
+            Assert.AreEqual(StatusCodes.Status404NotFound, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task GetLifeLogShouldReturnListOfLogsForCharacter()
+        {
+            //Arrange
+            const int testId = 1;
+            var character = CreateCharacter(testId);
+            List <GetLifeLogDto> logs = new List<GetLifeLogDto>
+            { 
+                LifeLog.CreateBornLog(character).ConvertToDto(),
+                LifeLog.CreateVictoryLog(character, "sword", "Opponent").ConvertToDto(),
+                LifeLog.CreateVictoryLog(character, "sword", "Opponent").ConvertToDto()
+            };
+            var mockResponse = ServiceResponse<List<GetLifeLogDto>>.From(logs);
+            lifeLogService.FromCharacter(testId).Returns(Task.FromResult(mockResponse));
+
+            //Act
+            var actionResult = await controller.GetLifeLog(testId);
+
+            //Assert
+            Assert.IsNotNull(actionResult);
+            var result = actionResult as OkObjectResult;
+            Assert.AreEqual(StatusCodes.Status200OK, result.StatusCode);
+        }
+
         #region utility methods
         private static GetCharacterDto CreateGetCharacterDto(int id) => new GetCharacterDto { Id = id, Name = $"character {id}" };
+        private static Character CreateCharacter(int id) => new Character {Id = id, Name = $"character {id}", Class = CharacterClass.Fighter, HitPoints = 100 };
 
         private IEnumerable<GetCharacterDto> GetFakeCharacterDtoList(int count = 10)
         {

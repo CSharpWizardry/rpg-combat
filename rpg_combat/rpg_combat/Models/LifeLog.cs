@@ -11,17 +11,17 @@ namespace rpg_combat.Models
         public bool IsVictory { get; set; }
         public Character Character { get; set; }
 
-        public static LifeLog CreateVictoryLog(Character character, string attackUsed, string opponentName)
-        {
-            return new LifeLog
-            {
-                Character = character,
-                HappenedOn = DateTime.UtcNow,
-                Log = $"On {DateTime.UtcNow} {character.Name} won his {character.Victories}th victory. He used {attackUsed} to hit the final blow and left the battle field with {character.HitPoints} hp. His opponent was {opponentName}.",
-                IsBattleLog = true,
-                IsVictory = true
-            };
-        }
+        //public static LifeLog CreateVictoryLog(Character character, string attackUsed, string opponentName)
+        //{
+        //    return new LifeLog
+        //    {
+        //        Character = character,
+        //        HappenedOn = DateTime.UtcNow,
+        //        Log = $"On {DateTime.UtcNow} {character.Name} won his {character.Victories}th victory. He used {attackUsed} to hit the final blow and left the battle field with {character.HitPoints} hp. His opponent was {opponentName}.",
+        //        IsBattleLog = true,
+        //        IsVictory = true
+        //    };
+        //}
 
         public static LifeLog CreateDefeatLog(Character character, string attackUsed, Character opponent)
         {

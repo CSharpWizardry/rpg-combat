@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using rpg_combat.Data;
 using rpg_combat.Dtos.Fight;
 using rpg_combat.Models;
+using rpg_combat.Services.LifeLogService;
 
 namespace rpg_combat.Services.FightService
 {
@@ -114,7 +115,7 @@ namespace rpg_combat.Services.FightService
                         opponent.Defeats++;
                         battleLog.Add($"{attacker.Name} wins with {attacker.HitPoints} HP left!");
                         battleLog.Add($"{opponent.Name} has been defeated"!);
-                        lifeLogs.Add(LifeLog.CreateVictoryLog(attacker, attackUsed, opponent.Name));
+                        lifeLogs.Add(LifeLogExtensions.CreateVictoryLog(attacker, attackUsed, opponent.Name));
                         lifeLogs.Add(LifeLog.CreateDefeatLog(opponent, attackUsed, attacker));
                         break;
                     }
