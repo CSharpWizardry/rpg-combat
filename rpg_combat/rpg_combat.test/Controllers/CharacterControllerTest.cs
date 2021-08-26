@@ -236,9 +236,9 @@ namespace rpg_combat.test
             var character = CreateCharacter(testId);
             List <GetLifeLogDto> logs = new List<GetLifeLogDto>
             { 
-                LifeLog.CreateBornLog(character).ConvertToDto(),
-                LifeLog.CreateVictoryLog(character, "sword", "Opponent").ConvertToDto(),
-                LifeLog.CreateVictoryLog(character, "sword", "Opponent").ConvertToDto()
+                LifeLogExtensions.CreateBornLog(character).ConvertToDto(),
+                LifeLogExtensions.CreateVictoryLog(character, "sword", "Opponent").ConvertToDto(),
+                LifeLogExtensions.CreateVictoryLog(character, "sword", "Opponent").ConvertToDto()
             };
             var mockResponse = ServiceResponse<List<GetLifeLogDto>>.From(logs);
             lifeLogService.FromCharacter(testId).Returns(Task.FromResult(mockResponse));

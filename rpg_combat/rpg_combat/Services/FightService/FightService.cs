@@ -116,7 +116,7 @@ namespace rpg_combat.Services.FightService
                         battleLog.Add($"{attacker.Name} wins with {attacker.HitPoints} HP left!");
                         battleLog.Add($"{opponent.Name} has been defeated"!);
                         lifeLogs.Add(LifeLogExtensions.CreateVictoryLog(attacker, attackUsed, opponent.Name));
-                        lifeLogs.Add(LifeLog.CreateDefeatLog(opponent, attackUsed, attacker));
+                        lifeLogs.Add(LifeLogExtensions.CreateDefeatLog(opponent, attackUsed, attacker));
                         break;
                     }
                 }

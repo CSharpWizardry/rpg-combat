@@ -59,7 +59,8 @@ namespace rpg_combat.test.Services
 
                 //Assert
                 Assert.IsNotNull(result);
-                //Assert.IsTrue(typeof(result) == IEnumerable<GetCharacterDto>));
+                Assert.IsTrue(result.GetType() == typeof(List<GetCharacterDto>));
+                Assert.AreEqual(expected: 0, result.Count());
             }
         }
 

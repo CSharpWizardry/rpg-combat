@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using rpg_combat.Data;
 using rpg_combat.Dtos.Character;
 using rpg_combat.Models;
+using rpg_combat.Services.LifeLogService;
 
 namespace rpg_combat.Services.CharacterService
 {
@@ -31,7 +32,7 @@ namespace rpg_combat.Services.CharacterService
             var user = await context.Users.FirstOrDefaultAsync(u => u.Id == GetUserId());
             var character = mapper.Map<Character>(newCharacter);
             character.User = user;
-            character.LifeLogs.Add(LifeLog.CreateBornLog(character));
+            character.LifeLogs.Add(LifeLogExtensions.CreateBornLog(character));
             await context.Characters.AddAsync(character);
             await context.SaveChangesAsync();
             return mapper.Map<GetCharacterDto>(character);
