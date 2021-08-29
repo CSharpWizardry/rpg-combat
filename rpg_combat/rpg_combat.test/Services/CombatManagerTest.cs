@@ -11,12 +11,14 @@ namespace rpg_combat.test.Services
         private Character opponent;
 
         #region Damage tests
-        #region Weapon
+        #region Test Weapon
         [TestMethod]
         public void DoWeaponDamageShouldReturnZeroWhenDefenseIsGreaterThanAttackValue()
         {
             //Arrange
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Strength = 0;
+            attacker.Weapon.Damage = 1;
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
             opponent.Defense = 100;
             //Act
@@ -80,7 +82,7 @@ namespace rpg_combat.test.Services
         {
             //Arrange
             int maxDamage = 20;
-            int opponentsDefense = 10;
+            int opponentsDefense = 0;
             int maxHitPoints = 100;
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
             attacker.Weapon.Damage = -20;
@@ -91,7 +93,138 @@ namespace rpg_combat.test.Services
             //Act
             var damage = CombatManager.DoWeaponDamage(attacker, opponent);
             //Assert
-            Assert.IsTrue(opponent.HitPoints < maxHitPoints && opponent.HitPoints > maxDamage);
+            Assert.IsTrue(opponent.HitPoints < maxHitPoints);
+        }
+
+        [TestMethod]
+        public void DoWeaponDamageShouldIgnoreNegativeOpponentDefense()
+        {
+            //Arrange
+            int maxDamage = 20;
+            int opponentsDefense = -50;
+            int maxHitPoints = 100;
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Weapon.Damage = maxDamage;
+            attacker.Strength = 0;
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = opponentsDefense;
+            opponent.HitPoints = maxHitPoints;
+            //Act
+            var damage = CombatManager.DoWeaponDamage(attacker, opponent);
+            //Assert
+            Assert.AreEqual(80, opponent.HitPoints);
+            Assert.AreEqual(maxDamage, damage);
+        }
+        #endregion
+
+        #region Test Skill
+
+        [TestMethod]
+        public void DoSkillDamageShouldReturnZeroWhenDefenseIsGreaterThanAttackValue()
+        {
+            //ATTENTION! since defense is a random value between 1 and max defense we can't
+            //really guarantee that it will be greater than the attack value of 1 so flake tests can exist
+            //Arrange
+            int opponentsDefense = 100;
+            int skillMaxDamage = 1;
+            int maxHitPoints = 100;
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Intelligence = 0;
+            var skill = attacker.CharacterSkills.Find(s => s.SkillId == 1).Skill;
+            skill.Damage = skillMaxDamage;
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = opponentsDefense;
+            opponent.HitPoints = maxHitPoints;
+            //Act
+            var damage = CombatManager.DoSkillDamage(attacker, opponent, skill);
+            //Assert
+            Assert.AreEqual(maxHitPoints, opponent.HitPoints);
+            Assert.AreEqual(0, damage);
+        }
+
+        [TestMethod]
+        public void DoSkillDamageShouldReturnDamageValueWhenAttackValueIsGreaterThanDefense()
+        {
+            int opponentsDefense = 0;
+            int skillMaxDamage = 20;
+            int maxHitPoints = 100;
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Intelligence = 10;
+            var skill = attacker.CharacterSkills.Find(s => s.SkillId == 1).Skill;
+            skill.Damage = skillMaxDamage;
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = opponentsDefense;
+            opponent.HitPoints = maxHitPoints;
+            //Act
+            var damage = CombatManager.DoSkillDamage(attacker, opponent, skill);
+            //Assert
+            Assert.IsTrue(damage >= 20 && damage <= (skillMaxDamage + attacker.Intelligence));
+            Assert.IsTrue(opponent.HitPoints < maxHitPoints);
+        }
+
+        [TestMethod]
+        public void DoSkillDamageShouldIgnoreNegativeAttackerStrenghtAttribute()
+        {
+            int opponentsDefense = 1;
+            int skillMaxDamage = 20;
+            int inteliggence = -14;
+            int maxHitPoints = 100;
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Intelligence = inteliggence;
+            var skill = attacker.CharacterSkills.Find(s => s.SkillId == 1).Skill;
+            skill.Damage = skillMaxDamage;
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = opponentsDefense;
+            opponent.HitPoints = maxHitPoints;
+            //Act
+            var damage = CombatManager.DoSkillDamage(attacker, opponent, skill);
+            //Assert
+            Assert.IsTrue(damage >= 19);
+            Assert.IsTrue(opponent.HitPoints < maxHitPoints);
+        }
+
+        [TestMethod]
+        public void DoSkillDamageShouldIgnoreNegativeSkillDamageValue()
+        {
+            //This method can be a flake since both intelligence and defense can have 1 as value and 
+            //the total damage would be zero
+            int opponentsDefense = 1;
+            int skillMaxDamage = -20;
+            int inteliggence = 20;
+            int maxHitPoints = 100;
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Intelligence = inteliggence;
+            var skill = attacker.CharacterSkills.Find(s => s.SkillId == 1).Skill;
+            skill.Damage = skillMaxDamage;
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = opponentsDefense;
+            opponent.HitPoints = maxHitPoints;
+            //Act
+            var damage = CombatManager.DoSkillDamage(attacker, opponent, skill);
+            //Assert
+            Assert.IsTrue(damage > 0);
+            Assert.IsTrue(opponent.HitPoints < maxHitPoints);
+        }
+
+        [TestMethod]
+        public void DoSkillDamageShouldIgnoreNegativeOpponentDefense()
+        {
+            //Arrange
+            int skillMaxDamage = 20;
+            int opponentsDefense = -50;
+            int maxHitPoints = 100;
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            var skill = attacker.CharacterSkills.Find(s => s.SkillId == 1).Skill;
+            skill.Damage = skillMaxDamage;
+            attacker.Intelligence = 0;
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = opponentsDefense;
+            opponent.HitPoints = maxHitPoints;
+            //Act
+            var damage = CombatManager.DoSkillDamage(attacker, opponent, skill);
+            //Assert
+            Assert.AreEqual(80, opponent.HitPoints);
+            Assert.AreEqual(skillMaxDamage, damage);
         }
         #endregion
 

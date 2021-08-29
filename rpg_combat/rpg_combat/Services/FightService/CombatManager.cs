@@ -35,6 +35,8 @@ namespace rpg_combat.Services.FightService
         /// Calculates the damage by the formula:
         /// - Attacker's weapon full damage + random value to the max of attacker's strength
         /// - minus the opponent's defense value
+        /// 
+        /// This method ignores negative/zero values for weapon damage, attacker strength and opponentes defense.
         /// </summary>
         /// <param name="attacker"></param>
         /// <param name="opponent"></param>
@@ -43,7 +45,20 @@ namespace rpg_combat.Services.FightService
         {
             var strength = attacker.Strength > 0 ? new Random().Next(1, attacker.Strength) : 0;
             int damage = GetPositiveValueOrZero(attacker.Weapon.Damage) + strength;
-            damage -= new Random().Next(1,opponent.Defense);
+            damage -= opponent.Defense > 0 ? new Random().Next(1, opponent.Defense) : 0;
+            if (damage < 0)
+            {
+                damage = 0;
+            }
+            opponent.HitPoints -= damage;
+            return damage;
+        }
+
+        public static int DoSkillDamage(Character attacker, Character opponent, Skill skill)
+        {
+            var intelligence = attacker.Intelligence > 0 ? new Random().Next(1, attacker.Intelligence) : 0;
+            int damage = GetPositiveValueOrZero(skill.Damage) + intelligence;
+            damage -= opponent.Defense > 0 ? new Random().Next(1, opponent.Defense) : 0;
             if (damage < 0)
             {
                 damage = 0;
