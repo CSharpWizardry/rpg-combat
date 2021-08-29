@@ -67,7 +67,7 @@ namespace rpg_combat.Services.FightService
 
 
             //any value between zero and the strenght (plus weapon damage) - any value between zero and defense
-            int damage = DoWeaponDamage(attacker, opponent);
+            int damage = CombatManager.DoWeaponDamage(attacker, opponent);
 
             context.Characters.Update(opponent);
             await context.SaveChangesAsync();
@@ -75,11 +75,9 @@ namespace rpg_combat.Services.FightService
         }
         public async Task<ServiceResponse<FightResultDto>> Fight(FightRequestDto request)
         {
-            List<Character> characters = await context.Characters
-                                                                .Include(c => c.Weapon)
-                                                                .Include(c => c.CharacterSkills).ThenInclude(cs => cs.Skill)
-                                                                .Where(c => request.CharacterIds.Contains(c.Id)).ToListAsync();
+            List<Character> characters = await GetCharactersWithSkillsAndWeapon(request.CharacterIds);
 
+            //defeat today considers only the first to die, not all of them.
             bool defeated = false;
             List<string> battleLog = new List<string>();
             int winnerId = request.CharacterIds.First();
@@ -94,11 +92,12 @@ namespace rpg_combat.Services.FightService
                     int damage = 0;
                     string attackUsed = String.Empty;
 
+                    //Todo: possibility to do nothing
                     bool useWeapon = new Random().Next(2) == 0;
                     if (useWeapon)
                     {
                         attackUsed = attacker.Weapon.Name;
-                        damage = DoWeaponDamage(attacker, opponent);
+                        damage = CombatManager.DoWeaponDamage(attacker, opponent);
                     }
                     else
                     {
@@ -106,7 +105,9 @@ namespace rpg_combat.Services.FightService
                         attackUsed = skill.Name;
                         damage = DoSkillDamage(attacker, opponent, skill);
                     }
-                    battleLog.Add($"{attacker.Name} attacks {opponent.Name} using {attackUsed} with {(damage >= 0 ? damage : 0)} damage.");
+                    string hitDamage = damage <= 0 ? "and missed!" : $"with {damage} damage.";
+
+                    battleLog.Add($"{attacker.Name} attacks {opponent.Name} using {attackUsed} {hitDamage}");
                     if (opponent.HitPoints <= 0)
                     {
                         winnerId = attacker.Id;
@@ -138,13 +139,12 @@ namespace rpg_combat.Services.FightService
             });
         }
 
-        private static int DoWeaponDamage(Character attacker, Character opponent)
+        private async Task<List<Character>> GetCharactersWithSkillsAndWeapon(List<int> characterIds)
         {
-            int damage = attacker.Weapon.Damage + (new Random().Next(attacker.Strength));
-            damage -= new Random().Next(opponent.Defense);
-            if (damage > 0)
-                opponent.HitPoints -= damage;
-            return damage;
+            return await context.Characters
+                                            .Include(c => c.Weapon)
+                                            .Include(c => c.CharacterSkills).ThenInclude(cs => cs.Skill)
+                                            .Where(c => characterIds.Contains(c.Id)).ToListAsync();
         }
 
         private static int DoSkillDamage(Character attacker, Character opponent, Skill skill)
@@ -165,6 +165,6 @@ namespace rpg_combat.Services.FightService
                 Opponent = opponent.Name,
                 OpponentHp = opponent.HitPoints
             });
-        }        
+        }
     }
 }

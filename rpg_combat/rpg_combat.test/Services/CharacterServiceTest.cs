@@ -89,24 +89,11 @@ namespace rpg_combat.test.Services
         private static List<Character> GetListOfCharacters()
             => new List<Character>
             {
-                GetCharacter(userId),
-                GetCharacter(2),
-                GetCharacter(userId),
-                GetCharacter(3),
-                GetCharacter(userId),
-            };
-
-        private static Character GetCharacter(int userId)
-            => new Character
-            {
-                Id = characterId++,
-                Class = CharacterClass.Wizard,
-                HitPoints = 100,
-                User = new User
-                {
-                    Id = userId,
-                    Username = $"User {userId}"
-                }            
+                TestUtils.CreateCharacterWithUser(characterId, userId),
+                TestUtils.CreateCharacterWithUser(characterId, 2),
+                TestUtils.CreateCharacterWithUser(characterId, userId),
+                TestUtils.CreateCharacterWithUser(characterId, 3),
+                TestUtils.CreateCharacterWithUser(characterId, userId),
             };
         #endregion
     }

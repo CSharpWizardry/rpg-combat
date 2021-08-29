@@ -13,7 +13,7 @@ namespace rpg_combat.Models
         public CharacterClass Class { get; set; } = CharacterClass.Fighter;
         public User User { get; set; }
         public Weapon Weapon { get; set; }
-        public List<CharacterSkill> CharacterSkills { get; set; }
+        public List<CharacterSkill> CharacterSkills { get; set; } = new List<CharacterSkill>();
         public int Fights { get; set; }
         public int Victories { get; set; }
         public int Defeats { get; set; }

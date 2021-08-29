@@ -39,7 +39,7 @@ namespace rpg_combat.test
         {
             //Arrange
             int count = 10;
-            var fakeData = GetFakeCharacterDtoList(count);
+            var fakeData = TestUtils.CreateFakeCharacterDtoList(count);
             characterService.GetAll().Returns(Task.FromResult(fakeData));
             
             //Act
@@ -57,7 +57,7 @@ namespace rpg_combat.test
         {
             //Arrange
             int testId = 3;
-            var character = CreateGetCharacterDto(testId);
+            var character = TestUtils.CreateGetCharacterDto(testId);
             characterService.GetById(Arg.Any<int>()).Returns(Task.FromResult<GetCharacterDto>(null));
             characterService.GetById(testId).Returns(Task.FromResult(character));
 
@@ -93,7 +93,7 @@ namespace rpg_combat.test
         {
             //Arrange
             int id = 1;
-            characterService.GetById(id).Returns(Task.FromResult(CreateGetCharacterDto(id)));
+            characterService.GetById(id).Returns(Task.FromResult(TestUtils.CreateGetCharacterDto(id)));
 
             //Act
             var actionResult = await controller.Delete(id);
@@ -131,7 +131,7 @@ namespace rpg_combat.test
                 Intelligence = 10,
                 Strength = 10
             };
-            characterService.Add(characterRequest).Returns(Task.FromResult(CreateGetCharacterDto(1)));
+            characterService.Add(characterRequest).Returns(Task.FromResult(TestUtils.CreateGetCharacterDto(1)));
 
             //Act
             var actionResult = await controller.Create(characterRequest);
@@ -198,8 +198,8 @@ namespace rpg_combat.test
                 HitPoints = 100
             };
 
-            characterService.GetById(testId).Returns(Task.FromResult<GetCharacterDto>(CreateGetCharacterDto(testId)));
-            characterService.Update(characterRequest).Returns(Task.FromResult(CreateGetCharacterDto(testId)));
+            characterService.GetById(testId).Returns(Task.FromResult<GetCharacterDto>(TestUtils.CreateGetCharacterDto(testId)));
+            characterService.Update(characterRequest).Returns(Task.FromResult(TestUtils.CreateGetCharacterDto(testId)));
 
             //Act
             var actionResult = await controller.Update(testId, characterRequest);
@@ -233,7 +233,7 @@ namespace rpg_combat.test
         {
             //Arrange
             const int testId = 1;
-            var character = CreateCharacter(testId);
+            var character = TestUtils.CreateCharacter(testId);
             List <GetLifeLogDto> logs = new List<GetLifeLogDto>
             { 
                 LifeLogExtensions.CreateBornLog(character).ConvertToDto(),
@@ -252,17 +252,5 @@ namespace rpg_combat.test
             Assert.AreEqual(StatusCodes.Status200OK, result.StatusCode);
         }
 
-        #region utility methods
-        private static GetCharacterDto CreateGetCharacterDto(int id) => new GetCharacterDto { Id = id, Name = $"character {id}" };
-        private static Character CreateCharacter(int id) => new Character {Id = id, Name = $"character {id}", Class = CharacterClass.Fighter, HitPoints = 100 };
-
-        private IEnumerable<GetCharacterDto> GetFakeCharacterDtoList(int count = 10)
-        {
-            var list = new List<GetCharacterDto>();
-            for (int i = 0; i < count; i++)
-                list.Add(CreateGetCharacterDto(i));
-            return list;
-        }
-        #endregion
     }
 }
