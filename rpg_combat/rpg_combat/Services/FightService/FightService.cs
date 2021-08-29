@@ -18,6 +18,9 @@ namespace rpg_combat.Services.FightService
         private readonly IMapper mapper;
         private readonly ILogger<FightService> logger;
 
+        public static string ErrorMessageNoCharactersFound = "No characters found for the provided Ids";
+        public static string ErrorMessageNotEnoughCharacters = "Not enough characters to make a fight happen";
+
         //TODO: this service should receive the CharacterService and search characters by id! then use the authenticated user..
         public FightService(DataContext context, IMapper mapper, ILogger<FightService> logger)
         {
@@ -40,7 +43,7 @@ namespace rpg_combat.Services.FightService
             if (skill is null)
                 return ServiceResponse<AttackResultDto>.FailedFrom($"{attacker.Name} doesn't know that skill");
 
-            int damage = DoSkillDamage(attacker, opponent, skill);
+            int damage = CombatManager.DoSkillDamage(attacker, opponent, skill);
 
             context.Characters.Update(opponent);
             await context.SaveChangesAsync();
@@ -76,6 +79,10 @@ namespace rpg_combat.Services.FightService
         public async Task<ServiceResponse<FightResultDto>> Fight(FightRequestDto request)
         {
             List<Character> characters = await GetCharactersWithSkillsAndWeapon(request.CharacterIds);
+            if (characters.Count == 0)
+                return ServiceResponse<FightResultDto>.FailedFrom(ErrorMessageNoCharactersFound);
+            if (characters.Count < 2)
+                return ServiceResponse<FightResultDto>.FailedFrom("Not enough characters to make a fight happen");
 
             //defeat today considers only the first to die, not all of them.
             bool defeated = false;
@@ -91,23 +98,34 @@ namespace rpg_combat.Services.FightService
 
                     int damage = 0;
                     string attackUsed = String.Empty;
+                    bool skipTurn = false;
 
                     //Todo: possibility to do nothing
-                    bool useWeapon = new Random().Next(2) == 0;
-                    if (useWeapon)
+                    switch (CombatManager.DefineAttackOption())
                     {
-                        attackUsed = attacker.Weapon.Name;
-                        damage = CombatManager.DoWeaponDamage(attacker, opponent);
+                        case CombatManager.AttackOptions.Weapon:
+                            attackUsed = attacker.Weapon.Name;
+                            damage = CombatManager.DoWeaponDamage(attacker, opponent);
+                            break;
+                        case CombatManager.AttackOptions.Skill:
+                            var skill = attacker.CharacterSkills[new Random().Next(attacker.CharacterSkills.Count)].Skill;
+                            attackUsed = skill.Name;
+                            damage = CombatManager.DoSkillDamage(attacker, opponent, skill);
+                            break;
+                        case CombatManager.AttackOptions.DoNothing:
+                            skipTurn = true;
+                            break;
+                    }
+                    
+                    if (skipTurn)
+                    {
+                        battleLog.Add($"{attacker.Name} observed the adversary for too long and lost his chance to attack!");
                     }
                     else
                     {
-                        var skill = attacker.CharacterSkills[new Random().Next(attacker.CharacterSkills.Count)].Skill;
-                        attackUsed = skill.Name;
-                        damage = DoSkillDamage(attacker, opponent, skill);
+                        string hitDamage = damage <= 0 ? "and missed!" : $"with {damage} damage.";
+                        battleLog.Add($"{attacker.Name} attacks {opponent.Name} using {attackUsed} {hitDamage}");
                     }
-                    string hitDamage = damage <= 0 ? "and missed!" : $"with {damage} damage.";
-
-                    battleLog.Add($"{attacker.Name} attacks {opponent.Name} using {attackUsed} {hitDamage}");
                     if (opponent.HitPoints <= 0)
                     {
                         winnerId = attacker.Id;
@@ -147,14 +165,6 @@ namespace rpg_combat.Services.FightService
                                             .Where(c => characterIds.Contains(c.Id)).ToListAsync();
         }
 
-        private static int DoSkillDamage(Character attacker, Character opponent, Skill skill)
-        {
-            int damage = skill.Damage + (new Random().Next(attacker.Intelligence));
-            damage -= new Random().Next(opponent.Defense);
-            if (damage > 0)
-                opponent.HitPoints -= damage;
-            return damage;
-        }
         private static ServiceResponse<AttackResultDto> FromAttack(int damage, Character attacker, Character opponent)
         {
             return ServiceResponse<AttackResultDto>.From(new AttackResultDto
