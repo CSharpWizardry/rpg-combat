@@ -18,8 +18,8 @@ namespace rpg_combat.Services.FightService
         private readonly IMapper mapper;
         private readonly ILogger<FightService> logger;
 
-        public static string ErrorMessageNoCharactersFound = "No characters found for the provided Ids";
-        public static string ErrorMessageNotEnoughCharacters = "Not enough characters to make a fight happen";
+        public static readonly string ErrorMessageNoCharactersFound = "No characters found for the provided Ids";
+        public static readonly string ErrorMessageNotEnoughCharacters = "Not enough characters to make a fight happen";
 
         //TODO: this service should receive the CharacterService and search characters by id! then use the authenticated user..
         public FightService(DataContext context, IMapper mapper, ILogger<FightService> logger)
@@ -84,23 +84,28 @@ namespace rpg_combat.Services.FightService
             if (characters.Count < 2)
                 return ServiceResponse<FightResultDto>.FailedFrom("Not enough characters to make a fight happen");
 
-            //defeat today considers only the first to die, not all of them.
             bool defeated = false;
+            int opponentsStillStanding = characters.Count - 1;
+            Dictionary<Character, bool> opponentsDefeated = characters.ToDictionary(c => c, _ => false);
             List<string> battleLog = new List<string>();
             int winnerId = request.CharacterIds.First();
             List<LifeLog> lifeLogs = new List<LifeLog>();
+            
             while (!defeated)
             {
                 foreach (Character attacker in characters)
                 {
-                    List<Character> opponents = characters.Where(c => c.Id != attacker.Id).ToList();
+                    if (opponentsDefeated[attacker])
+                    {
+                        continue;
+                    }
+                    List<Character> opponents = opponentsDefeated.Where(keyValuePair => !keyValuePair.Value && keyValuePair.Key.Id != attacker.Id).Select(kvp => kvp.Key).ToList();
                     var opponent = opponents[new Random().Next(opponents.Count)];
 
                     int damage = 0;
                     string attackUsed = String.Empty;
                     bool skipTurn = false;
 
-                    //Todo: possibility to do nothing
                     switch (CombatManager.DefineAttackOption())
                     {
                         case CombatManager.AttackOptions.Weapon:
@@ -116,7 +121,7 @@ namespace rpg_combat.Services.FightService
                             skipTurn = true;
                             break;
                     }
-                    
+
                     if (skipTurn)
                     {
                         battleLog.Add($"{attacker.Name} observed the adversary for too long and lost his chance to attack!");
@@ -128,14 +133,19 @@ namespace rpg_combat.Services.FightService
                     }
                     if (opponent.HitPoints <= 0)
                     {
-                        winnerId = attacker.Id;
-                        defeated = true;
-                        attacker.Victories++;
+                        opponentsDefeated[opponent] = true;
                         opponent.Defeats++;
-                        battleLog.Add($"{attacker.Name} wins with {attacker.HitPoints} HP left!");
                         battleLog.Add($"{opponent.Name} has been defeated"!);
-                        lifeLogs.Add(LifeLogExtensions.CreateVictoryLog(attacker, attackUsed, opponent.Name));
                         lifeLogs.Add(LifeLogExtensions.CreateDefeatLog(opponent, attackUsed, attacker));
+                        opponentsStillStanding--;
+                    }
+                    if (opponentsStillStanding == 0)
+                    {
+                        winnerId = attacker.Id;
+                        attacker.Victories++;
+                        battleLog.Add($"{attacker.Name} wins with {attacker.HitPoints} HP left!");
+                        lifeLogs.Add(LifeLogExtensions.CreateVictoryLog(attacker, attackUsed, opponent.Name));
+                        defeated = true;
                         break;
                     }
                 }
