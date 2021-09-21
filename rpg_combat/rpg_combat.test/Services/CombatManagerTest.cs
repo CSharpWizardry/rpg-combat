@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using rpg_combat.Models;
 using rpg_combat.Services.FightService;
+using System.Collections.Generic;
 
 namespace rpg_combat.test.Services
 {
@@ -18,13 +19,13 @@ namespace rpg_combat.test.Services
             //Arrange
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
             attacker.Strength = 0;
-            attacker.Weapon.Damage = 1;
+            attacker.Weapon.Damage = 0;
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
             opponent.Defense = 100;
             //Act
             var damage = CombatManager.DoWeaponDamage(attacker, opponent);
             //Assert
-            Assert.IsTrue(damage <= 0);
+            Assert.AreEqual(0, damage);
         }
 
         [TestMethod]
@@ -33,12 +34,13 @@ namespace rpg_combat.test.Services
             //Arrange
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
             attacker.Weapon.Damage = 20;
+            attacker.Strength = 0;
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
-            opponent.Defense = 10;
+            opponent.Defense = 0;
             //Act
             var damage = CombatManager.DoWeaponDamage(attacker, opponent);
             //Assert
-            Assert.IsTrue(damage > 0);
+            Assert.AreEqual(20, damage);
         }
 
         [TestMethod]
@@ -48,7 +50,7 @@ namespace rpg_combat.test.Services
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
             attacker.Weapon.Damage = 20;
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
-            opponent.Defense = 10;
+            opponent.Defense = 0;
             opponent.HitPoints = 100;
             //Act
             var damage = CombatManager.DoWeaponDamage(attacker, opponent);
@@ -62,7 +64,7 @@ namespace rpg_combat.test.Services
         {
             //Arrange
             int maxDamage = 20;
-            int opponentsDefense = 10;
+            int opponentsDefense = 0;
             int maxHitPoints = 100;
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
             attacker.Weapon.Damage = maxDamage;
@@ -73,8 +75,8 @@ namespace rpg_combat.test.Services
             //Act
             var damage = CombatManager.DoWeaponDamage(attacker, opponent);
             //Assert
-            Assert.IsTrue(opponent.HitPoints < maxHitPoints && opponent.HitPoints > 80);
-            Assert.IsTrue(damage >= opponentsDefense  && damage < maxDamage);
+            Assert.IsTrue(opponent.HitPoints < maxHitPoints && opponent.HitPoints == 80);
+            Assert.AreEqual(maxDamage, damage);
         }
 
         [TestMethod]
@@ -228,6 +230,91 @@ namespace rpg_combat.test.Services
         }
         #endregion
 
+        #region Modifiers
+        [TestMethod]
+        public void DoWeaponDamageWithAttackStrenghtModifiersShouldDoMoreDamage()
+        {
+            int weaponDamage = 20;
+            // Arrange
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Weapon.Damage = weaponDamage;
+            attacker.Strength = 0;
+            attacker.Modifiers.Add(new Modifier(CharacterAttribute.Strenght, true, 20));
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = 0;
+            //Act
+            var damage = CombatManager.DoWeaponDamage(attacker, opponent);
+            //Assert
+            Assert.IsTrue(damage > weaponDamage);
+        }        
+        [TestMethod]
+        public void DoWeaponDamageShouldConsiderNegativeAttackStrenghtModifier()
+        {
+            int weaponDamage = 20;
+            // Arrange
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Weapon.Damage = weaponDamage;
+            attacker.Strength = 20;
+            attacker.Modifiers.Add(new Modifier(CharacterAttribute.Strenght, false, 20));
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = 0;
+            //Act
+            var damage = CombatManager.DoWeaponDamage(attacker, opponent);
+            //Assert
+            Assert.AreEqual(weaponDamage, damage);
+        }
+        [TestMethod]
+        public void DoWeaponDamageShouldIgnoreOtherAttackPositiveModifiers()
+        {
+            int weaponDamage = 20;
+            // Arrange
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Weapon.Damage = weaponDamage;
+            attacker.Strength = 0;
+            attacker.Modifiers.Add(new Modifier(CharacterAttribute.Intelligence, true, 20));
+            attacker.Modifiers.Add(new Modifier(CharacterAttribute.Defense, true, 20));
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = 0;
+            //Act
+            var damage = CombatManager.DoWeaponDamage(attacker, opponent);
+            //Assert
+            Assert.AreEqual(weaponDamage, damage);
+        }
+
+        [TestMethod]
+        public void DamageCalculationShouldConsiderPositiveDefenseModifier()
+        {
+            int weaponDamage = 20;
+            // Arrange
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Weapon.Damage = weaponDamage;
+            attacker.Strength = 0;
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = 0;
+            opponent.Modifiers.Add(new Modifier(CharacterAttribute.Defense, true, 20));
+            //Act
+            var damage = CombatManager.DoWeaponDamage(attacker, opponent);
+            //Assert
+            Assert.AreNotEqual(weaponDamage, damage);
+        }
+        [TestMethod]
+        public void DamageCalculationShouldConsiderNegativeDefenseModifier()
+        {
+            int weaponDamage = 20;
+            // Arrange
+            attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
+            attacker.Weapon.Damage = weaponDamage;
+            attacker.Strength = 0;
+            opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
+            opponent.Defense = 20;
+            opponent.Modifiers.Add(new Modifier(CharacterAttribute.Defense, false, 20));
+            //Act
+            var damage = CombatManager.DoWeaponDamage(attacker, opponent);
+            //Assert
+            Assert.AreEqual(weaponDamage, damage);
+        }
+        #endregion
+
         #region Test Utility Methods
         [TestMethod]
         public void GetPositiveValueOrZeroShouldReturnZeroWhenValueIsNegativeOrZero()
@@ -258,6 +345,45 @@ namespace rpg_combat.test.Services
             Assert.AreEqual(testValue, result);
             Assert.AreEqual(testValue2, result2);
         }
+
+        [TestMethod]
+        public void GetPositiveModifiersForAttributesShouldReturnEmptyListWhenNoAttributeIsFound()
+        {
+            var modifiers = new List<Modifier>
+            {
+                new Modifier
+                {
+                    Attribute = CharacterAttribute.Strenght,
+                    IsPositive = true,
+                    Value = 20
+                },
+                new Modifier
+                {
+                    Attribute = CharacterAttribute.Defense,
+                    IsPositive = true,
+                    Value = 20
+                }                
+            };
+
+            var positiveModifiers = CombatManager.GetPositiveModifiersForAttribute(CharacterAttribute.Intelligence); //with default parameter
+            var positiveModifiers2 = CombatManager.GetPositiveModifiersForAttribute(CharacterAttribute.Intelligence, modifiers);
+
+            modifiers.Add(new Modifier
+            {
+                Attribute = CharacterAttribute.Intelligence,
+                IsPositive = false,
+                Value = 20
+            });
+            var positiveModifiers3 = CombatManager.GetPositiveModifiersForAttribute(CharacterAttribute.Intelligence, modifiers);
+
+            Assert.IsNotNull(positiveModifiers);
+            Assert.AreEqual(0, positiveModifiers.Count);
+            Assert.IsNotNull(positiveModifiers2);
+            Assert.AreEqual(0, positiveModifiers2.Count);
+            Assert.IsNotNull(positiveModifiers3);
+            Assert.AreEqual(0, positiveModifiers3.Count);
+        }
+
         #endregion
 
         #endregion

@@ -1,19 +1,15 @@
-﻿using rpg_combat.Models;
+﻿using rpg_combat.Domain;
+using rpg_combat.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace rpg_combat.Services.FightService
 {
     public static class CombatManager
     {
-        public enum AttackOptions
-        {
-            Weapon,
-            Skill,
-            DoNothing
-        }
+        private static readonly int MinimalValueForDefensiveAttributes = 0;
+        private static readonly int MinimalValueForOffensiveAttributes = 1;
 
 
         /// <summary>
@@ -43,7 +39,7 @@ namespace rpg_combat.Services.FightService
         /// <returns>Damage took</returns>
         public static int DoWeaponDamage(Character attacker, Character opponent)
         {
-            var damage = CalculateDamage(attacker.Weapon.Damage, attacker.Strength, opponent.Defense);
+            var damage = CalculateDamage(attacker.Weapon.Damage, (CharacterAttribute.Strenght, attacker.Strength, attacker.Modifiers), (opponent.Defense, opponent.Modifiers));
             opponent.HitPoints -= damage;
             return damage;
         }
@@ -61,17 +57,52 @@ namespace rpg_combat.Services.FightService
         /// <returns>Damage took</returns>
         public static int DoSkillDamage(Character attacker, Character opponent, Skill skill)
         {
-            var damage = CalculateDamage(skill.Damage, attacker.Intelligence, opponent.Defense);
+            var damage = CalculateDamage(skill.Damage, (CharacterAttribute.Intelligence, attacker.Intelligence, attacker.Modifiers), (opponent.Defense, opponent.Modifiers));
             opponent.HitPoints -= damage;
             return damage;
         }
 
-        private static int CalculateDamage(int attackValue, int maxAttributeValue, int maxDefenseValue)
+        private static int CalculateDamage(int attackValue, (CharacterAttribute attribute, int maxAttributeValue, List<Modifier> modifiers) attackAttribute, (int maxDefenseValue, List<Modifier> modifiers) defenseAttribute)
         {
-            var attributeValue = maxAttributeValue > 0 ? new Random().Next(1, maxAttributeValue) : 0;
+            //calculates total attacker attribute values
+            var positiveAttackModifiers = GetPositiveModifiersForAttribute(attackAttribute.attribute, attackAttribute.modifiers);
+            var sumOfPositiveAttackModifiers = GetSumOfModifiers(positiveAttackModifiers);
+            var sumOfNegativeAttackModifiers = GetSumOfModifiers(GetNegativeModifiersForAttribute(attackAttribute.attribute, attackAttribute.modifiers));
+            int totalAttributeValue = (attackAttribute.maxAttributeValue + sumOfPositiveAttackModifiers) - sumOfNegativeAttackModifiers;
+            var attributeValue = totalAttributeValue > 0 ? new Random().Next(MinimalValueForOffensiveAttributes, totalAttributeValue) : 0;
             int damage = GetPositiveValueOrZero(attackValue) + attributeValue;
-            damage -= maxDefenseValue > 0 ? new Random().Next(1, maxDefenseValue) : 0;
+
+            //calculates total opponent defense
+            var positiveDefenseModifiers = GetPositiveModifiersForAttribute(CharacterAttribute.Defense, defenseAttribute.modifiers);
+            var sumOfPositiveDefenseModifiers = GetSumOfModifiers(positiveDefenseModifiers);
+            var sumOfNegativeDefenseModifiers = GetSumOfModifiers(GetNegativeModifiersForAttribute(CharacterAttribute.Defense, defenseAttribute.modifiers));
+            var totalDefenseValue = (defenseAttribute.maxDefenseValue + sumOfPositiveDefenseModifiers) - sumOfNegativeDefenseModifiers;
+            int defense = totalDefenseValue > 0 ? new Random().Next(MinimalValueForDefensiveAttributes, totalDefenseValue) : 0;
+            
+            damage -= defense;
             return damage < 0 ? 0 : damage;
+        }
+        public static List<Modifier> GetPositiveModifiersForAttribute(CharacterAttribute attribute, List<Modifier> modifiers = default)
+        {
+            if (modifiers is null)
+                return new List<Modifier>();
+
+            return modifiers.Where(modifier => modifier.Attribute.Equals(attribute) && modifier.IsPositive).ToList();
+        }
+
+        public static List<Modifier> GetNegativeModifiersForAttribute(CharacterAttribute attribute, List<Modifier> modifiers = default)
+        {
+            if (modifiers is null)
+                return new List<Modifier>();
+
+            return modifiers.Where(modifier => modifier.Attribute.Equals(attribute) && !modifier.IsPositive).ToList();
+        }
+
+        public static int GetSumOfModifiers(List<Modifier> modifiers = default)
+        {
+            if (modifiers is null)
+                return 0;
+            return modifiers.Sum(modifier => modifier.Value);
         }
 
         /// <summary>

@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using rpg_combat.Data;
+using rpg_combat.Domain;
 using rpg_combat.Dtos.Fight;
 using rpg_combat.Models;
 using rpg_combat.Services.LifeLogService;
@@ -17,6 +18,7 @@ namespace rpg_combat.Services.FightService
         private readonly DataContext context;
         private readonly IMapper mapper;
         private readonly ILogger<FightService> logger;
+        private static readonly List<BattleEvent> events = GenerateEvents();
 
         public static readonly string ErrorMessageNoCharactersFound = "No characters found for the provided Ids";
         public static readonly string ErrorMessageNotEnoughCharacters = "Not enough characters to make a fight happen";
@@ -76,6 +78,8 @@ namespace rpg_combat.Services.FightService
             await context.SaveChangesAsync();
             return FromAttack(damage, attacker, opponent);
         }
+
+        //TODO: CREATE A COMBAT PIPELINE!
         public async Task<ServiceResponse<FightResultDto>> Fight(FightRequestDto request)
         {
             List<Character> characters = await GetCharactersWithSkillsAndWeapon(request.CharacterIds);
@@ -90,7 +94,6 @@ namespace rpg_combat.Services.FightService
             List<string> battleLog = new List<string>();
             int winnerId = request.CharacterIds.First();
             List<LifeLog> lifeLogs = new List<LifeLog>();
-            
             while (!defeated)
             {
                 foreach (Character attacker in characters)
@@ -105,22 +108,24 @@ namespace rpg_combat.Services.FightService
                     int damage = 0;
                     string attackUsed = String.Empty;
                     bool skipTurn = false;
-
-                    switch (CombatManager.DefineAttackOption())
+                    AttackOptions attackSelected = CombatManager.DefineAttackOption();
+                    switch (attackSelected)
                     {
-                        case CombatManager.AttackOptions.Weapon:
+                        case AttackOptions.Weapon:
                             attackUsed = attacker.Weapon.Name;
                             damage = CombatManager.DoWeaponDamage(attacker, opponent);
                             break;
-                        case CombatManager.AttackOptions.Skill:
+                        case AttackOptions.Skill:
                             var skill = attacker.CharacterSkills[new Random().Next(attacker.CharacterSkills.Count)].Skill;
                             attackUsed = skill.Name;
                             damage = CombatManager.DoSkillDamage(attacker, opponent, skill);
                             break;
-                        case CombatManager.AttackOptions.DoNothing:
+                        case AttackOptions.DoNothing:
                             skipTurn = true;
                             break;
                     }
+
+                    RunEvents(battleLog, attacker, opponent, attackSelected);
 
                     if (skipTurn)
                     {
@@ -157,14 +162,35 @@ namespace rpg_combat.Services.FightService
                 c.HitPoints = 100;
             });
 
-            context.Characters.UpdateRange(characters);
-            await context.LifeLogs.AddRangeAsync(lifeLogs);
-            await context.SaveChangesAsync();
+            //TODO: create modifiers table and re-enable the code below
+            //context.Characters.UpdateRange(characters);
+            //await context.LifeLogs.AddRangeAsync(lifeLogs);
+            //await context.SaveChangesAsync();
             return ServiceResponse<FightResultDto>.From(new FightResultDto
             {
                 WinnerId = winnerId,
                 BattleLog = battleLog
             });
+        }
+
+        private static void RunEvents(List<string> battleLog, Character attacker, Character opponent, AttackOptions attackSelected)
+        {
+            foreach (var battleEvent in events)
+            {
+                var wasTrigged = battleEvent.Trigger((attacker, attackSelected), opponent);
+                if (wasTrigged && battleEvent.EffectTarget.Equals(Target.OPPONENT))
+                {
+                    if (battleEvent.CanStack || !opponent.Modifiers.Contains(battleEvent.Effect))
+                    {
+                        opponent.Modifiers.Add(battleEvent.Effect);
+                        battleLog.Add($"{opponent.Name} received the effect {battleEvent.Name}");
+                    }
+                    else
+                    {
+                        battleLog.Add($"{opponent.Name} DIDNT receive the effect {battleEvent.Name} because he already has it");
+                    }
+                }
+            }
         }
 
         private async Task<List<Character>> GetCharactersWithSkillsAndWeapon(List<int> characterIds)
@@ -186,5 +212,50 @@ namespace rpg_combat.Services.FightService
                 OpponentHp = opponent.HitPoints
             });
         }
+
+
+        //TODO: Temporary only, should come from DB or a file
+        private static List<BattleEvent> GenerateEvents()
+        {
+            return new List<BattleEvent> {
+                new BattleEvent{
+                    Name = "Pregador",
+                    Description = "Um forte golpe de martelo na cabeça",
+                    Effect = new Modifier(CharacterAttribute.Intelligence, false, 2),
+                    EffectTarget = Target.OPPONENT,
+                    EventFrequency = Frequency.AllTheTime,
+                    Trigger = ((Character self, AttackOptions attackOption) characterAttackTuple, Character opponent) =>
+                    {
+                        bool containsHammer = characterAttackTuple.self.Weapon.Name.Contains("Spear", StringComparison.InvariantCultureIgnoreCase);
+                        return characterAttackTuple.attackOption.Equals(AttackOptions.Weapon) && containsHammer;
+                    }
+                },
+                new BattleEvent{
+                    Name = "Manetinha",
+                    Description = "Virei um membro dos cavaleiros negros",
+                    //Modificador cortar na metade
+                    Effect = new Modifier(CharacterAttribute.Strenght, false, 10),
+                    EffectTarget = Target.OPPONENT,
+                    EventFrequency = Frequency.AllTheTime,
+                    Trigger = ((Character self, AttackOptions attackOption) characterAttackTuple, Character opponent) =>
+                    {
+                        return opponent.Strength < 20 && opponent.HitPoints < 30;
+                    }
+                },
+                new BattleEvent{
+                    Name = "Pombo cagou na minha cabeça e me cegou",
+                    Description = "Peguem o pombo",
+                    Effect = new Modifier(CharacterAttribute.Defense, false, 12),
+                    EffectTarget = Target.SELF,
+                    EventFrequency = Frequency.AllTheTime,
+                    Trigger = ((Character self, AttackOptions attackOption) characterAttackTuple, Character opponent) =>
+                    {
+                        var rand = new Random();
+                        return rand.Next(30) == 15;
+                    }
+                },
+            };
+        }
+
     }
 }
