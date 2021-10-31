@@ -1,11 +1,12 @@
 ﻿namespace rpg_combat.Models
 {
-    public class Modifier
+    public class AttributeModifier
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Origin { get; set; }
+        public bool IsPermanent { get; set; }
         //TODO: Should add these new properties?
         //Operation? Subtraction, sum, multiply, divide
         //Run out after some number of turns?
@@ -13,10 +14,10 @@
         public bool IsPositive { get; set; } //be replaced with negative numbers???
         public bool IsUnique { get; set; }
         public int Value { get; set; }
-        //Attributos and complex attributes
+        //Attributs and complex attributes
         public CharacterAttribute Attribute { get; set; }
-        public Modifier(){}
-        public Modifier(CharacterAttribute attribute, bool isPositive, int value)
+        public AttributeModifier(){}
+        public AttributeModifier(CharacterAttribute attribute, bool isPositive, int value)
         {
             Attribute = attribute;
             IsPositive = isPositive;

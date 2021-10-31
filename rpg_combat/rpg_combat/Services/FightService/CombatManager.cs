@@ -28,18 +28,19 @@ namespace rpg_combat.Services.FightService
         }
 
         /// <summary>
+        /// <para>
         /// Calculates the damage by the formula:
         /// - Attacker's weapon full damage + random value to the max of attacker's strength
         /// - minus a random value up to opponent's defense value
-        /// 
-        /// This method ignores negative/zero values for weapon damage, attacker strength and opponentes defense.
+        /// </para>
+        /// <para>This method ignores negative/zero values for weapon damage, attacker strength and opponentes defense.</para>
         /// </summary>
         /// <param name="attacker"></param>
         /// <param name="opponent"></param>
         /// <returns>Damage took</returns>
         public static int DoWeaponDamage(Character attacker, Character opponent)
         {
-            var damage = CalculateDamage(attacker.Weapon.Damage, (CharacterAttribute.Strenght, attacker.Strength, attacker.Modifiers), (opponent.Defense, opponent.Modifiers));
+            var damage = CalculateDamage(attacker.Weapon.Damage, (CharacterAttribute.Strenght, attacker.Strength, attacker.AttributeModifiers), (opponent.Defense, opponent.AttributeModifiers));
             opponent.HitPoints -= damage;
             return damage;
         }
@@ -57,12 +58,12 @@ namespace rpg_combat.Services.FightService
         /// <returns>Damage took</returns>
         public static int DoSkillDamage(Character attacker, Character opponent, Skill skill)
         {
-            var damage = CalculateDamage(skill.Damage, (CharacterAttribute.Intelligence, attacker.Intelligence, attacker.Modifiers), (opponent.Defense, opponent.Modifiers));
+            var damage = CalculateDamage(skill.Damage, (CharacterAttribute.Intelligence, attacker.Intelligence, attacker.AttributeModifiers), (opponent.Defense, opponent.AttributeModifiers));
             opponent.HitPoints -= damage;
             return damage;
         }
 
-        private static int CalculateDamage(int attackValue, (CharacterAttribute attribute, int maxAttributeValue, List<Modifier> modifiers) attackAttribute, (int maxDefenseValue, List<Modifier> modifiers) defenseAttribute)
+        private static int CalculateDamage(int attackValue, (CharacterAttribute attribute, int maxAttributeValue, List<AttributeModifier> modifiers) attackAttribute, (int maxDefenseValue, List<AttributeModifier> modifiers) defenseAttribute)
         {
             //calculates total attacker attribute values
             var positiveAttackModifiers = GetPositiveModifiersForAttribute(attackAttribute.attribute, attackAttribute.modifiers);
@@ -82,23 +83,23 @@ namespace rpg_combat.Services.FightService
             damage -= defense;
             return damage < 0 ? 0 : damage;
         }
-        public static List<Modifier> GetPositiveModifiersForAttribute(CharacterAttribute attribute, List<Modifier> modifiers = default)
+        public static List<AttributeModifier> GetPositiveModifiersForAttribute(CharacterAttribute attribute, List<AttributeModifier> modifiers = default)
         {
             if (modifiers is null)
-                return new List<Modifier>();
+                return new List<AttributeModifier>();
 
             return modifiers.Where(modifier => modifier.Attribute.Equals(attribute) && modifier.IsPositive).ToList();
         }
 
-        public static List<Modifier> GetNegativeModifiersForAttribute(CharacterAttribute attribute, List<Modifier> modifiers = default)
+        public static List<AttributeModifier> GetNegativeModifiersForAttribute(CharacterAttribute attribute, List<AttributeModifier> modifiers = default)
         {
             if (modifiers is null)
-                return new List<Modifier>();
+                return new List<AttributeModifier>();
 
             return modifiers.Where(modifier => modifier.Attribute.Equals(attribute) && !modifier.IsPositive).ToList();
         }
 
-        public static int GetSumOfModifiers(List<Modifier> modifiers = default)
+        public static int GetSumOfModifiers(List<AttributeModifier> modifiers = default)
         {
             if (modifiers is null)
                 return 0;

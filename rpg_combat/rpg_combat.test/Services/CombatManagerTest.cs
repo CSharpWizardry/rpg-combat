@@ -239,7 +239,7 @@ namespace rpg_combat.test.Services
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
             attacker.Weapon.Damage = weaponDamage;
             attacker.Strength = 0;
-            attacker.Modifiers.Add(new Modifier(CharacterAttribute.Strenght, true, 20));
+            attacker.AttributeModifiers.Add(new AttributeModifier(CharacterAttribute.Strenght, true, 20));
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
             opponent.Defense = 0;
             //Act
@@ -255,7 +255,7 @@ namespace rpg_combat.test.Services
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
             attacker.Weapon.Damage = weaponDamage;
             attacker.Strength = 20;
-            attacker.Modifiers.Add(new Modifier(CharacterAttribute.Strenght, false, 20));
+            attacker.AttributeModifiers.Add(new AttributeModifier(CharacterAttribute.Strenght, false, 20));
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
             opponent.Defense = 0;
             //Act
@@ -271,8 +271,8 @@ namespace rpg_combat.test.Services
             attacker = TestUtils.CreateCharacterWithWeaponAndSkills();
             attacker.Weapon.Damage = weaponDamage;
             attacker.Strength = 0;
-            attacker.Modifiers.Add(new Modifier(CharacterAttribute.Intelligence, true, 20));
-            attacker.Modifiers.Add(new Modifier(CharacterAttribute.Defense, true, 20));
+            attacker.AttributeModifiers.Add(new AttributeModifier(CharacterAttribute.Intelligence, true, 20));
+            attacker.AttributeModifiers.Add(new AttributeModifier(CharacterAttribute.Defense, true, 20));
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
             opponent.Defense = 0;
             //Act
@@ -291,7 +291,7 @@ namespace rpg_combat.test.Services
             attacker.Strength = 0;
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
             opponent.Defense = 0;
-            opponent.Modifiers.Add(new Modifier(CharacterAttribute.Defense, true, 20));
+            opponent.AttributeModifiers.Add(new AttributeModifier(CharacterAttribute.Defense, true, 20));
             //Act
             var damage = CombatManager.DoWeaponDamage(attacker, opponent);
             //Assert
@@ -307,7 +307,7 @@ namespace rpg_combat.test.Services
             attacker.Strength = 0;
             opponent = TestUtils.CreateCharacterWithWeaponAndSkills();
             opponent.Defense = 20;
-            opponent.Modifiers.Add(new Modifier(CharacterAttribute.Defense, false, 20));
+            opponent.AttributeModifiers.Add(new AttributeModifier(CharacterAttribute.Defense, false, 20));
             //Act
             var damage = CombatManager.DoWeaponDamage(attacker, opponent);
             //Assert
@@ -349,15 +349,15 @@ namespace rpg_combat.test.Services
         [TestMethod]
         public void GetPositiveModifiersForAttributesShouldReturnEmptyListWhenNoAttributeIsFound()
         {
-            var modifiers = new List<Modifier>
+            var modifiers = new List<AttributeModifier>
             {
-                new Modifier
+                new AttributeModifier
                 {
                     Attribute = CharacterAttribute.Strenght,
                     IsPositive = true,
                     Value = 20
                 },
-                new Modifier
+                new AttributeModifier
                 {
                     Attribute = CharacterAttribute.Defense,
                     IsPositive = true,
@@ -368,7 +368,7 @@ namespace rpg_combat.test.Services
             var positiveModifiers = CombatManager.GetPositiveModifiersForAttribute(CharacterAttribute.Intelligence); //with default parameter
             var positiveModifiers2 = CombatManager.GetPositiveModifiersForAttribute(CharacterAttribute.Intelligence, modifiers);
 
-            modifiers.Add(new Modifier
+            modifiers.Add(new AttributeModifier
             {
                 Attribute = CharacterAttribute.Intelligence,
                 IsPositive = false,

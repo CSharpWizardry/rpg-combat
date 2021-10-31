@@ -160,6 +160,8 @@ namespace rpg_combat.Services.FightService
             {
                 c.Fights++;
                 c.HitPoints = 100;
+                //cleans all non-permanent modifiers added during a fight
+                c.AttributeModifiers.RemoveAll(modifier => !modifier.IsPermanent);
             });
 
             //TODO: create modifiers table and re-enable the code below
@@ -180,14 +182,14 @@ namespace rpg_combat.Services.FightService
                 var wasTrigged = battleEvent.Trigger((attacker, attackSelected), opponent);
                 if (wasTrigged && battleEvent.EffectTarget.Equals(Target.OPPONENT))
                 {
-                    if (battleEvent.CanStack || !opponent.Modifiers.Contains(battleEvent.Effect))
+                    if (battleEvent.CanStack || !opponent.AttributeModifiers.Contains(battleEvent.Effect))
                     {
-                        opponent.Modifiers.Add(battleEvent.Effect);
+                        opponent.AttributeModifiers.Add(battleEvent.Effect);
                         battleLog.Add($"{opponent.Name} received the effect {battleEvent.Name}");
                     }
                     else
                     {
-                        battleLog.Add($"{opponent.Name} DIDNT receive the effect {battleEvent.Name} because he already has it");
+                        battleLog.Add($"{opponent.Name} Didn't receive the effect {battleEvent.Name} because he already has it");
                     }
                 }
             }
@@ -221,7 +223,7 @@ namespace rpg_combat.Services.FightService
                 new BattleEvent{
                     Name = "Pregador",
                     Description = "Um forte golpe de martelo na cabeça",
-                    Effect = new Modifier(CharacterAttribute.Intelligence, false, 2),
+                    Effect = new AttributeModifier(CharacterAttribute.Intelligence, false, 2),
                     EffectTarget = Target.OPPONENT,
                     EventFrequency = Frequency.AllTheTime,
                     Trigger = ((Character self, AttackOptions attackOption) characterAttackTuple, Character opponent) =>
@@ -234,7 +236,7 @@ namespace rpg_combat.Services.FightService
                     Name = "Manetinha",
                     Description = "Virei um membro dos cavaleiros negros",
                     //Modificador cortar na metade
-                    Effect = new Modifier(CharacterAttribute.Strenght, false, 10),
+                    Effect = new AttributeModifier(CharacterAttribute.Strenght, false, 10),
                     EffectTarget = Target.OPPONENT,
                     EventFrequency = Frequency.AllTheTime,
                     Trigger = ((Character self, AttackOptions attackOption) characterAttackTuple, Character opponent) =>
@@ -245,7 +247,7 @@ namespace rpg_combat.Services.FightService
                 new BattleEvent{
                     Name = "Pombo cagou na minha cabeça e me cegou",
                     Description = "Peguem o pombo",
-                    Effect = new Modifier(CharacterAttribute.Defense, false, 12),
+                    Effect = new AttributeModifier(CharacterAttribute.Defense, false, 12),
                     EffectTarget = Target.SELF,
                     EventFrequency = Frequency.AllTheTime,
                     Trigger = ((Character self, AttackOptions attackOption) characterAttackTuple, Character opponent) =>

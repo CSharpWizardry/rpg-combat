@@ -7,7 +7,7 @@ namespace rpg_combat.Domain
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public Modifier Effect { get; set; }
+        public AttributeModifier Effect { get; set; }
         public Frequency EventFrequency { get; set; }
         public Target EffectTarget { get; set; }
         /// <summary>

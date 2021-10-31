@@ -18,6 +18,6 @@ namespace rpg_combat.Models
         public int Victories { get; set; }
         public int Defeats { get; set; }
         public List<LifeLog> LifeLogs { get; set; } = new List<LifeLog>();
-        public List<Modifier> Modifiers { get; set; } = new List<Modifier>();
+        public List<AttributeModifier> AttributeModifiers { get; set; } = new List<AttributeModifier>();
     }
 }
