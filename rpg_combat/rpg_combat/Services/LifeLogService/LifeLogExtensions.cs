@@ -42,6 +42,21 @@ namespace rpg_combat.Services.LifeLogService
             };
         }
 
+        public static LifeLog CreateAttributeModifierLog(Character character, AttributeModifier modifier)
+        {
+            string modifierType = modifier.IsPermanent ? "buff" : "debuff";
+            string signal = modifier.IsPositive ? "+" : "-";
+
+            return new LifeLog
+            {
+                Character = character,
+                HappenedOn = DateTime.UtcNow,
+                Log = $"On {DateTime.UtcNow} {character.Name} received the {modifierType} {modifier.Name} from {modifier.Origin}. From now on his {modifier.Attribute} attribute will be considered with a {signal}{modifier.Value}",
+                IsBattleLog = false,
+                IsVictory = false
+            };
+        }
+
         public static GetLifeLogDto ConvertToDto(this LifeLog lifeLog)
         {
             return new GetLifeLogDto

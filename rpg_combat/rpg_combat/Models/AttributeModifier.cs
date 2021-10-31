@@ -16,6 +16,8 @@
         public int Value { get; set; }
         //Attributs and complex attributes
         public CharacterAttribute Attribute { get; set; }
+        public Character Character { get; set; }
+
         public AttributeModifier(){}
         public AttributeModifier(CharacterAttribute attribute, bool isPositive, int value)
         {

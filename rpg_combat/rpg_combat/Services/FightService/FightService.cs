@@ -164,10 +164,9 @@ namespace rpg_combat.Services.FightService
                 c.AttributeModifiers.RemoveAll(modifier => !modifier.IsPermanent);
             });
 
-            //TODO: create modifiers table and re-enable the code below
-            //context.Characters.UpdateRange(characters);
-            //await context.LifeLogs.AddRangeAsync(lifeLogs);
-            //await context.SaveChangesAsync();
+            context.Characters.UpdateRange(characters);
+            await context.LifeLogs.AddRangeAsync(lifeLogs);
+            await context.SaveChangesAsync();
             return ServiceResponse<FightResultDto>.From(new FightResultDto
             {
                 WinnerId = winnerId,
@@ -186,6 +185,8 @@ namespace rpg_combat.Services.FightService
                     {
                         opponent.AttributeModifiers.Add(battleEvent.Effect);
                         battleLog.Add($"{opponent.Name} received the effect {battleEvent.Name}");
+                        if (battleEvent.Effect.IsPermanent)
+                            opponent.LifeLogs.Add(LifeLogExtensions.CreateAttributeModifierLog(opponent, battleEvent.Effect));
                     }
                     else
                     {
@@ -236,7 +237,15 @@ namespace rpg_combat.Services.FightService
                     Name = "Manetinha",
                     Description = "Virei um membro dos cavaleiros negros",
                     //Modificador cortar na metade
-                    Effect = new AttributeModifier(CharacterAttribute.Strenght, false, 10),
+                    Effect = new AttributeModifier {
+                        Attribute = CharacterAttribute.Strenght,
+                        Name = "Desmembrado",
+                        Description = "Character lost a limb",
+                        Origin = "Manetinha",
+                        IsPositive = false,
+                        Value = 10,
+                        IsPermanent = true
+                    },
                     EffectTarget = Target.OPPONENT,
                     EventFrequency = Frequency.AllTheTime,
                     Trigger = ((Character self, AttackOptions attackOption) characterAttackTuple, Character opponent) =>
