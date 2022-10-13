@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\rpg_combat\rpg-combat.csproj" />
+    <ProjectReference Include="..\..\src\rpg_combat\rpg-combat.csproj" />
   </ItemGroup>
 
 </Project>
